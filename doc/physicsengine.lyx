@@ -1,0 +1,1171 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section*
+Mass object
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\frac{dx}{dt}=v$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\frac{\nabla x}{\nabla t}=v_{new}*k+v_{old}*(1-k)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\nabla x=v_{new}*k*\nabla t+v_{old}*(1-k)*\nabla t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $x_{new}-x_{old}=v_{new}*k*\nabla t+v_{old}*(1-k)*\nabla t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $x_{new}-k*\nabla t*v_{new}=x_{old}+v_{old}*(1-k)*\nabla t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\frac{dy}{dt}=v$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+....
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\frac{dv}{dt}=\frac{1}{m}\sum F$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\frac{\nabla v}{\nabla t}=\frac{1}{m}\sum F_{new}*k+\frac{1}{m}\sum F_{old}*(1-k)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\nabla v=\frac{1}{m}\sum F_{new}*k*\nabla t+\frac{1}{m}\sum F_{old}*(1-k)*\nabla t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $v_{new}-v_{old}=\frac{1}{m}\sum F_{new}*k*\nabla t+\frac{1}{m}\sum F_{old}*(1-k)*\nabla t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $v_{new}-\frac{1}{m}\sum F_{new}*k*\nabla t=v_{old}+\frac{1}{m}\sum F_{old}*(1-k)*\nabla t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+...
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\frac{d\emptyset}{dt}=w$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\frac{\nabla\emptyset}{\nabla t}=w_{new}*k+w_{old}*(1-k)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\emptyset_{new}-\emptyset_{old}=w_{new}*k*\nabla t+w_{old}*(1-k)*\nabla t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\emptyset_{new}-w_{new}*k*\nabla t=\emptyset_{old}+w_{old}*(1-k)*\nabla t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\frac{dw}{dt}=\frac{1}{I}\sum\tau$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\frac{\nabla w}{\nabla t}=\frac{1}{I}\sum\tau_{new}*k+\frac{1}{I}\sum\tau_{old}*(1-k)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\nabla w=\frac{1}{I}\sum\tau_{new}*k*\nabla t+\frac{1}{I}\sum\tau_{old}*(1-k)*\nabla t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $w_{new}-w_{old}=\frac{1}{I}\sum\tau_{new}*k*\nabla t+\frac{1}{I}\sum\tau_{old}*(1-k)*\nabla t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula $w_{new}-\frac{1}{I}\sum\tau_{new}*k*\nabla t=w_{old}+\frac{1}{I}\sum\tau_{old}*(1-k)*\nabla t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Compound pendlum
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename compondpendlum.png
+	lyxscale 10
+	scale 10
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Physic model
+\end_layout
+
+\begin_layout Standard
+Object variables: 
+\begin_inset Formula $p=\left\{ p_{x},p_{y}\right\} ,\Theta_{p}$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Forces: 
+\begin_inset Formula $F=\left\{ F_{x},F_{y}\right\} ,\tau$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Constants: 
+\begin_inset Formula $c=\left\{ c_{x},c_{y}\right\} ,\Theta_{f},l$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Model:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Theta_{sum}=\Theta_{f}+\Theta_{c}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p=c+l\cdot e^{i\cdot\Theta}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Force prependicular to pendlum angle equals torque / l
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+F_{x}\cdot\cos\left(\Theta_{sum}+\pi/42\right)+F_{y}\cdot sin\left(\Theta_{sum}+\pi/2\right)=\frac{\tau}{l}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+rewritten:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+p_{x} & = & c_{x}+l\cdot\cos\Theta_{sum}\\
+p_{y} & = & c_{y}+l\cdot\sin\Theta_{sum}\\
+F_{x}\cdot\sin\left(\Theta_{sum}\right)-F_{y}\cdot\cos\left(\Theta_{sum}\right) & = & \frac{\tau}{l}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+implementation: 
+\end_layout
+
+\begin_layout Standard
+_next is next newton rhapsson iteration, _curr is current value
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\cos\left(\Theta+\Delta\Theta\right) & \approx & \cos\left(\Theta\right)-\sin\left(\Theta\right)\cdot\Delta\Theta\\
+\sin\left(\Theta+\Delta\Theta\right) & \approx & \sin\left(\Theta\right)+\cos\left(\Theta\right)\cdot\Delta\Theta\\
+\Delta\Theta & = & \Theta_{next}-\Theta_{curr}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Eq1
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+p_{x_{next}} & = & c_{x}+l\cdot\cos\left(\Theta_{sum}+\Delta\Theta\right)\Longrightarrow\\
+p_{x_{next}} & = & c_{x}+l\cdot\cos\left(\Theta_{sum}\right)-l\cdot\sin\left(\Theta_{sum}\right)\cdot\Delta\Theta\Longrightarrow\\
+p_{x_{next}} & = & c_{x}+l\cdot\cos\left(\Theta_{sum}\right)-l\cdot\sin\left(\Theta_{sum}\right)\cdot\Theta_{next}+l\cdot\sin\left(\Theta_{sum}\right)\cdot\Theta_{curr}\Longrightarrow\\
+p_{x_{next}}+l\cdot\sin\left(\Theta_{sum}\right)\cdot\Theta_{next} & = & c_{x}+l\cdot\cos\left(\Theta_{sum}\right)+l\cdot\sin\left(\Theta_{sum}\right)\cdot\Theta_{curr}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Eq2
+\begin_inset Formula 
+\begin{eqnarray*}
+p_{y_{next}} & = & c_{y}+l\cdot\sin\left(\Theta_{sum}+\Delta\Theta\right)\Longrightarrow\\
+p_{y_{next}} & = & c_{y}+l\cdot\sin\left(\Theta_{sum}\right)+l\cdot\cos\left(\Theta_{sum}\right)\cdot\Delta\Theta\Longrightarrow\\
+p_{y{}_{next}} & = & c_{y}+l\cdot\sin\left(\Theta_{sum}\right)+l\cdot\cos\left(\Theta_{sum}\right)\cdot\Theta_{next}-l\cdot\cos\left(\Theta_{sum}\right)\cdot\Theta_{curr}\Longrightarrow\\
+p_{y_{next}}-l\cdot\cos\left(\Theta_{sum}\right)\cdot\Theta_{next} & = & c_{y}+l\cdot\sin\left(\Theta_{sum}\right)-l\cdot\cos\left(\Theta_{sum}\right)\cdot\Theta_{curr}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Eq2
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+F_{xnext}\cdot\sin\left(\Theta_{sum}\right)-F_{ynext}\cdot\cos\left(\Theta_{sum}\right) & = & \frac{\tau_{next}}{l}\Longrightarrow\\
+F_{xnext}\cdot l\cdot\sin\left(\Theta_{sum}\right)-F_{ynext}\cdot l\cdot\cos\left(\Theta_{sum}\right)-\tau_{next} & = & 0
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Spring pendlum
+\end_layout
+
+\begin_layout Subsection
+Enery loss
+\end_layout
+
+\begin_layout Section
+Lose pendlum
+\end_layout
+
+\begin_layout Standard
+Object variables: 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $p_{1}=\left\{ x_{1},y_{1}\right\} ,p_{2}=\left\{ x_{2},y_{2}\right\} $
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+Forces: 
+\begin_inset Formula $F_{1}=\left\{ F_{x},F_{y}\right\} $
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Constants: 
+\begin_inset Formula $l$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Model:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(x_{1}-x_{2}\right)^{2}+\left(y_{1}-y_{2}\right)^{2}=l^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+-vy\cdot F_{x}+vx\cdot F_{y}=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left\{ vx,vy\right\} =\left\{ x_{1}-x_{2},y_{1}-y_{2}\right\} 
+\]
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Implementation:
+\end_layout
+
+\begin_layout Verse
+\begin_inset Formula 
+\begin{eqnarray*}
+\left(x_{1}-x_{2}\right)^{2}+\left(y_{1}-y_{2}\right)^{2} & = & l^{2}\Rightarrow\\
+\left(x_{1_{curr}}-x_{2_{curr}}\right)\cdot\left(x_{1_{next}}-x_{2_{next}}\right)+\left(y_{1_{curr}}-y_{2_{curr}}\right)\cdot\left(y_{1_{next}}-y_{2_{next}}\right) & = & l\left|x_{1_{curr}}-x_{2_{curr}},y_{1_{curr}}-y_{2_{curr}}\right|\Rightarrow\\
+vx\cdot x_{1}-vx\cdot x_{2}+vy\cdot y_{1}-vy\cdot y_{2} & = & l\cdot\sqrt{\left(vx\cdot vx+vy\cdot vy\right)}
+\end{eqnarray*}
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+One side fixed connection
+\end_layout
+
+\begin_layout Standard
+Object variables: 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $p_{1}=\left\{ x_{1},y_{1}\right\} ,p_{2}=\left\{ x_{2},y_{2}\right\} ,\theta_{1}$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+Forces: 
+\begin_inset Formula $F=\left\{ F_{1},F_{1}\right\} ,\tau$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Constants: 
+\begin_inset Formula $l,\theta_{f}$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Model:
+\begin_inset Formula 
+\[
+p_{2}=p_{1}+l\cdot e^{i\cdot\Theta}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\tau=l\cdot\left\{ -\sin\left(\theta_{1}+\theta_{f}\right)\cdot F_{x},\cos\left(\theta_{1}+\theta_{f}\right)\cdot F_{y}\right\} 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Help:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\cos\left(\Theta+\Delta\Theta\right) & \approx & \cos\left(\Theta\right)-\sin\left(\Theta\right)\cdot\Delta\Theta\\
+\sin\left(\Theta+\Delta\Theta\right) & \approx & \sin\left(\Theta\right)+\cos\left(\Theta\right)\cdot\Delta\Theta\\
+\Delta\Theta & = & \Theta_{next}-\Theta_{curr}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Implementation:
+\end_layout
+
+\begin_layout Standard
+eq1:
+\end_layout
+
+\begin_layout Verse
+\begin_inset Formula 
+\begin{eqnarray*}
+p_{2} & = & p_{1}+l\cdot e^{i\cdot\Theta}\Rightarrow\\
+x_{2_{next}} & = & x_{1_{next}}+l\cdot\text{\cos}\left(\theta_{1_{curr}}+\theta_{f}+\Delta\theta\right)\Rightarrow\\
+x_{2_{next}}-x_{1_{next}} & = & l\cdot\text{\cos}\left(\theta_{1_{curr}}+\theta_{f}\right)-l\cdot\sin\left(\theta_{1_{curr}}+\theta_{f}\right)\cdot\left(\Theta_{1_{next}}-\Theta_{1_{curr}}\right)\\
+x_{2_{next}}-x_{1_{next}}+l\cdot\sin\left(\theta_{1_{curr}}+\theta_{f}\right)\cdot\Theta_{1_{next}} & = & l\cdot\text{\cos}\left(\theta_{1_{curr}}+\theta_{f}\right)+l\cdot\sin\left(\theta_{1_{curr}}+\theta_{f}\right)\cdot\Theta_{1_{curr}}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Verse
+eq2:
+\end_layout
+
+\begin_layout Verse
+\begin_inset Formula 
+\begin{eqnarray*}
+p_{2} & = & p_{1}+l\cdot e^{i\cdot\Theta}\Rightarrow\\
+y_{2_{next}} & = & y_{1_{next}}+l\cdot\sin\left(\theta_{1_{curr}}+\theta_{f}+\Delta\theta\right)\Rightarrow\\
+y_{2_{next}}-y_{1_{next}} & = & l\cdot\sin\left(\theta_{1_{curr}}+\theta_{f}\right)+l\cdot\cos\left(\theta_{1_{curr}}+\theta_{f}\right)\cdot\left(\Theta_{1_{next}}-\Theta_{1_{curr}}\right)\\
+y_{2_{next}}-y_{1_{next}}-l\cdot\cos\left(\theta_{1_{curr}}+\theta_{f}\right)\cdot\Theta_{1_{next}} & = & l\cdot\sin\left(\theta_{1_{curr}}+\theta_{f}\right)-l\cdot\cos\left(\theta_{1_{curr}}+\theta_{f}\right)\cdot\Theta_{1_{curr}}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Verse
+eq3:
+\end_layout
+
+\begin_layout Verse
+\begin_inset Formula 
+\[
+\tau_{next}=l\cdot\left\{ -\sin\left(\theta_{1_{curr}}+\theta_{f}\right)\cdot F_{x_{nect}},\cos\left(\theta_{1_{curr}}+\theta_{f}\right)\cdot F_{y_{next}}\right\} 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Fixed connection
+\end_layout
+
+\begin_layout Standard
+Object variables: 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $p_{1}=\left\{ x_{1},y_{1}\right\} ,p_{2}=\left\{ x_{2},y_{2}\right\} ,\theta_{1},\theta_{2}$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+Forces: 
+\begin_inset Formula $F_{1}=\left\{ F_{1x},F_{1y}\right\} ,F_{2}=\left\{ F_{2},F_{2}\right\} ,\tau_{1},\tau_{2}$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Constants: 
+\begin_inset Formula $l,\theta_{f1},\theta_{f2}$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Model:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(x_{1}-x_{2}\right)^{2}+\left(y_{1}-y_{2}\right)^{2}=l^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+-vy_{norm}\cdot F_{1x}+vx_{norm}\cdot F_{1y}=\frac{\tau_{2}}{l}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+-vy_{norm}\cdot F_{2x}+vx_{norm}\cdot F_{2y}=\frac{\tau_{1}}{l}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+vx_{norm}\cdot F_{1x}+vy_{norm}\cdot F_{1y}+vx_{norm}\cdot F_{2x}+vy_{norm}\cdot F_{2y}=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\tan\left(\theta_{1}+\theta_{f1}\right)=\frac{x_{1}-x_{2}}{y_{1}-y_{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\theta_{1}+\theta_{f1}=\theta_{2}+\theta_{f2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left\{ vy_{norm},vy_{norm}\right\} =\left\{ x_{1}-x_{2},y_{1}-y_{2}\right\} /abs(vx,vy)
+\]
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Implementation:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+vx^{*} & = & x_{1}-x_{2}\\
+vy^{*} & = & y_{1}-y_{2}\\
+scale & = & \frac{l}{vx^{*2}+vy^{*2}}\\
+vx & = & vx^{*}\cdot scale\\
+vy & = & vy^{*}\cdot scale
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+eq1:
+\end_layout
+
+\begin_layout Verse
+\begin_inset Formula 
+\begin{eqnarray*}
+\left(x_{1}-x_{2}\right)^{2}+\left(y_{1}-y_{2}\right)^{2} & = & l^{2}\Rightarrow\\
+\left(x_{1_{curr}}-x_{2_{curr}}\right)\cdot\left(x_{1_{next}}-x_{2_{next}}\right)+\left(y_{1_{curr}}-y_{2_{curr}}\right)\cdot\left(y_{1_{next}}-y_{2_{next}}\right) & = & l\left|x_{1_{curr}}-x_{2_{curr}},y_{1_{curr}}-y_{2_{curr}}\right|\Rightarrow\\
+vx\cdot x_{1}-vx\cdot x_{2}+vy\cdot y_{1}-vy\cdot y_{2} & = & l^{2}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Verse
+eq2:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\cos\left(\Theta+\Delta\Theta\right) & \approx & \cos\left(\Theta\right)-\sin\left(\Theta\right)\cdot\Delta\Theta\\
+\sin\left(\Theta+\Delta\Theta\right) & \approx & \sin\left(\Theta\right)+\cos\left(\Theta\right)\cdot\Delta\Theta\\
+\Delta\Theta & = & \Theta_{next}-\Theta_{curr}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Verse
+\begin_inset Formula 
+\begin{eqnarray*}
+l\cdot cos\left(\theta_{1}+\theta_{f1}\right) & = & x_{1}-x_{2}\Rightarrow\\
+l\cdot cos\left(\theta_{1}+\theta_{f1}+\Delta\theta_{1}\right) & = & \Delta x_{1}-\Delta x_{2}\Rightarrow\\
+l\cdot\cos\left(\theta_{1}+\theta_{f1}\right)-l\cdot\sin\left(\theta_{1}+\theta_{f1}\right)\cdot\left(\Theta_{1next}-\theta_{1curr}\right) & = & x_{1next}-x_{1curr}-x_{2next}+x_{2curr}\Rightarrow\\
+-l\cdot\sin\left(\theta_{1}+\theta_{f1}\right)\cdot\Theta_{1next}+x_{1next}-x_{2next} & = & -l\cdot\cos\left(\theta_{1}+\theta_{f1}\right)-l\cdot\sin\left(\theta_{1}+\theta_{f1}\right)\cdot\theta_{1curr}-x_{1curr}+x_{2curr}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Verse
+eq3:
+\end_layout
+
+\begin_layout Verse
+\begin_inset Formula 
+\begin{eqnarray*}
+\theta_{1}+\theta_{f1} & = & \theta_{2}+\theta_{f2}\Rightarrow\\
+\text{\theta}_{1}-\theta_{2} & = & -\theta_{f1}+\theta_{f2}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Verse
+eq4:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+-vy_{norm}\cdot F_{1x}+vx_{norm}\cdot F_{1y} & = & \frac{\tau_{2}}{l}\Rightarrow\\
+-vy\cdot F_{1x}+vx\cdot F_{1y} & -\tau_{2}= & 0
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+eq5:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+-vy_{norm}\cdot F_{2x}+vx_{norm}\cdot F_{2y} & = & \frac{\tau_{1}}{l}\\
+-vy\cdot F_{2x}+vx\cdot F_{2y} & = & \tau_{1}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+eq6:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+x_{norm}\cdot F_{1x}+y_{norm}\cdot F_{1y}+x_{norm}\cdot F_{2x}+y_{norm}\cdot F_{2y}=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Friction
+\end_layout
+
+\begin_layout Subsection
+Point connected to line
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+p_{1}+l_{1}\cdot e^{j\left(\theta_{f1}+\theta_{1}\right)}=p_{2}+l_{2}\cdot e^{j\left(\theta_{f2}+\theta_{2}\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+trig
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\cos\left(\Theta+\Delta\Theta\right) & \approx & \cos\left(\Theta\right)-\sin\left(\Theta\right)\cdot\Delta\Theta\\
+\sin\left(\Theta+\Delta\Theta\right) & \approx & \sin\left(\Theta\right)+\cos\left(\Theta\right)\cdot\Delta\Theta\\
+\Delta\Theta & = & \Theta_{next}-\Theta_{curr}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Eq1
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+p_{1}+l_{1}\cdot e^{j\left(\theta_{f1}+\theta_{1}\right)} & = & p_{2}+l_{2}\cdot e^{j\left(\theta_{f2}+\theta_{2}\right)}\Rightarrow\\
+x_{1_{next}}+l_{1}\cdot\cos\left(\theta_{f1}+\theta_{1_{curr}}+\Delta\theta_{1}\right) & = & x_{2_{nect}}+l_{2}\cdot\cos\left(\theta_{f2}+\theta_{2_{curr}}+\Delta\theta_{2}\right)\Rightarrow\\
+x_{1_{next}}+l_{1}\cdot\cos\left(\theta_{f1}+\theta_{1_{curr}}\right)-l_{1}\cdot\sin\left(\theta_{f1}+\theta_{1_{curr}}\right)\cdot\left(\theta_{1_{next}}-\theta_{1_{curr}}\right) & = & x_{2_{next}}+l_{2}\cdot\cos\left(\theta_{f2}+\theta_{2_{curr}}\right)-l_{2}\cdot\sin\left(\theta_{f2}+\theta_{2_{curr}}\right)\cdot\left(\theta_{2{}_{next}}-\theta_{2_{curr}}\right)\Rightarrow\\
+x_{1_{next}}-l_{1}\cdot\sin\left(\theta_{f1}+\theta_{1_{curr}}\right)\cdot\theta_{1_{next}}-x_{2_{next}}+l_{2}\cdot\sin\left(\theta_{f2}+\theta_{2_{curr}}\right)\cdot\theta_{2_{next}} & = & -l_{1}\cdot\cos\left(\theta_{f1}+\theta_{1_{curr}}\right)-l_{1}\cdot\sin\left(\theta_{f1}+\theta_{1_{curr}}\right)\cdot\theta_{1_{curr}}+l_{2}\cdot\cos\left(\theta_{f2}+\theta_{2_{curr}}\right)+l_{2}\cdot\sin\left(\theta_{f2}+\theta_{2_{curr}}\right)\cdot\theta_{2_{curr}}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Eq2
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+p_{1}+l_{1}\cdot e^{j\left(\theta_{f1}+\theta_{1}\right)} & = & p_{2}+l_{2}\cdot e^{j\left(\theta_{f2}+\theta_{2}\right)}\Rightarrow\\
+y_{1_{next}}+l_{1}\cdot\sin\left(\theta_{f1}+\theta_{1_{curr}}+\Delta\theta_{1}\right) & = & y_{2_{nect}}+l_{2}\cdot\sin\left(\theta_{f2}+\theta_{2_{curr}}+\Delta\theta_{2}\right)\Rightarrow\\
+y_{1_{next}}+l_{1}\cdot\sin\left(\theta_{f1}+\theta_{1_{curr}}\right)+l_{1}\cdot\cos\left(\theta_{f1}+\theta_{1_{curr}}\right)\cdot\left(\theta_{1_{next}}-\theta_{1_{curr}}\right) & = & y_{2_{next}}+l_{2}\cdot\sin\left(\theta_{f2}+\theta_{2_{curr}}\right)+l_{2}\cdot\cos\left(\theta_{f2}+\theta_{2_{curr}}\right)\cdot\left(\theta_{2{}_{next}}-\theta_{2_{curr}}\right)\Rightarrow\\
+y_{1_{next}}+l_{1}\cdot\cos\left(\theta_{f1}+\theta_{1_{curr}}\right)\cdot\theta_{1_{next}}-y_{2_{next}}-l_{2}\cdot\cos\left(\theta_{f2}+\theta_{2_{curr}}\right)\cdot\theta_{2_{next}} & = & -l_{1}\cdot\sin\left(\theta_{f1}+\theta_{1_{curr}}\right)+l_{1}\cdot\cos\left(\theta_{f1}+\theta_{1_{curr}}\right)\cdot\theta_{1_{curr}}+l_{2}\cdot\sin\left(\theta_{f2}+\theta_{2_{curr}}\right)-l_{2}\cdot\cos\left(\theta_{f2}+\theta_{2_{curr}}\right)\cdot\theta_{2_{curr}}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Eq3
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+-vy\cdot F_{1x}+vx\cdot F_{1y} & = & \frac{\tau_{1}}{l_{1}}\Rightarrow\\
+-l_{1}\cdot\sin\left(\theta_{f1}+\theta_{1_{curr}}\right)\cdot F_{1x}+l_{1}\cdot\cos\left(\theta_{f1}+\theta_{1_{curr}}\right)\cdot F_{1y}-\tau_{1} & = & 0
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Eq4
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+-vy\cdot F_{1x}+vx\cdot F_{1y} & =- & \frac{\tau_{2}}{l}\Rightarrow\\
+-l_{2}\cdot\sin\left(\theta_{f2}+\theta_{2_{curr}}\right)\cdot F_{1x}+l_{2}\cdot\cos\left(\theta_{f1}+\theta_{2_{curr}}\right)\cdot F_{1y}+\tau_{1} & = & 0
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Collision
+\end_layout
+
+\begin_layout Subsection
+Before
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename collision_before.eps
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Type A
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename collision.eps
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Know angles: 
+\begin_inset Formula $\Theta_{n}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Unknown angles: 
+\begin_inset Formula $\alpha_{n}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\alpha_{1} & = & \theta_{2}-\theta_{1}\\
+\alpha_{2} & = & \pi-\theta_{4}-\alpha_{1}\\
+\alpha_{3} & = & \theta_{2}+\alpha_{2}-\theta_{3}\\
+\alpha_{4} & = & \pi-\theta_{5}+\alpha_{3}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Type B
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename collision2.eps
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{eqnarray*}
+\alpha_{1} & = & \theta_{2}-\theta_{1}\\
+\alpha_{2} & = & \pi-\theta_{4}-\alpha_{1}\\
+\alpha_{3} & = & \theta_{2}+\pi-(\alpha_{2}+\theta_{3})\\
+\alpha_{4} & = & \pi-\theta_{5}+\alpha_{3}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+a
+\end_layout
+
+\begin_layout Standard
+P3_rot =
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\frac{\left(x_{1}\cdot x_{v}+y_{1}\cdot y_{v}\right)^{2}}{\sqrt{x_{v}^{2}+y_{v}^{2}}\cdot\sqrt{x_{1}^{2}\cdot x_{v}^{2}+2\cdot x_{1}\cdot y_{1}\cdot x_{v}\cdot y_{v}+y_{1}^{2}\cdot y_{v}^{2}}}=\frac{\left|x_{1}\cdot x_{v}+y_{1}\cdot y_{v}\right|}{\sqrt{x_{v}^{2}+y_{v}^{2}}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+0
+\end_layout
+
+\begin_layout Standard
+P4_rot =
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\left(x_{1}\cdot vx+p1y\cdot vy\right)\cdot\left(p2x\cdot vx+p2y\cdot vy\right)/(\left(vx^{2}+vy^{2}\right)\cdot((\left(p1x^{2}\cdot vx^{2}+2\cdot p1x\cdot p1y\cdot vx\cdot vy+p1y^{2}\cdot vy^{2}\right))/(vx^{2}+vy^{2}))^{(1/2)})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+asd
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+l1 & = & \frac{\left(p1x\cdot p2y-p2x\cdot p1y\right)\cdot\left(-p1x^{2}+p2x\cdot p1x-p1y^{2}+p2y\cdot p1y\right)}{\left(\frac{\left(p1x\cdot p2y-p2x\cdot p1y\right)^{2}}{p1x^{2}-2\cdot p1x\cdot p2x+p2x^{2}+p1y^{2}-2\cdot p1y\cdot p2y+p2y^{2}}\right)^{1/2}\cdot\left(p1x^{2}-2\cdot p1x\cdot p2x+p2x^{2}+p1y^{2}-2*p1y*p2y+p2y^{2}\right)}=\\
+l1 & = & \frac{sgn\left(p1x\cdot p2y-p2x\cdot p1y\right)\cdot\left(-p1x^{2}+p2x\cdot p1x-p1y^{2}+p2y\cdot p1y\right)}{\sqrt{\left(p1x-p2x\right)^{2}+\left(p1y-p2y\right)^{2}}}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+l2=\frac{sgn\left(p1x\cdot p2y-p2x\cdot p1y\right)\cdot\left(p2x^{2}-p1x\cdot p2x+p2y^{2}-p1y*p2y\right)}{\sqrt{\left(p1x-p2x\right)^{2}+\left(p1y-p2y\right)^{2}}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
