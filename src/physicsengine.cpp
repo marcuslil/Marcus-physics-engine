@@ -6,7 +6,6 @@ PhysicsEngine::PhysicsEngine()
 {
     set_delta_t=0.1;
     t=0;
-    register_variables(0,0); // to init 0 matrix
     energy_error_check=1e-3;
     sub_iteration=0;
     max_subitarations=2;
@@ -18,6 +17,7 @@ PhysicsEngine::PhysicsEngine()
     k_energy_conserv=false;
     k=1;
     add_k=0.001;
+    clear();
 }
 
 PhysicsEngine::~PhysicsEngine()
@@ -25,55 +25,70 @@ PhysicsEngine::~PhysicsEngine()
     clear();
 }
 
+void PhysicsEngine::init()
+{
+    t=0;
+    acc_energy_error=0.0;
+    for (int v=0;v!=eq_variables.size();v++)
+    {
+        eq_variables[v]->nr=v;
+        eq_variables[v]->pos=curr.size();
+        Q_ASSERT(eq_variables.at(v)->size()==sizeof(qreal));
+        curr.resize(curr.size()+sizeof(qreal));
+        eq_variables[v]->initialize();
+    }
+    for (int v=0;v!=variables.size();v++)
+    {
+        variables[v]->pos=curr.size();
+        curr.resize(curr.size()+variables.at(v)->size());
+        variables[v]->initialize();
+    }
+    prev=curr;
+    prev_t=curr;
+
+#ifdef USE_ARMADILLO
+    A.resize(eq_variables.size(),eq_variables.size());
+    A.fill(0);
+    B.resize(eq_variables.size());
+    B.fill(0);
+#else
+    size=eq_variables.size();
+    size2=eq_variables.size()+1;
+    matrix.resize(size*size2);
+    matrix.fill(0);
+#endif
+}
+
 
 void PhysicsEngine::clear()
 {
     while(!objects.isEmpty())
         delete objects.last();
+    eq_variables.clear();
     variables.clear();
+    eq_variables.clear();
     energies.clear();
-    states.clear();
-    t=0;
-    register_variables(0,0); // to init 0 matrix
-    acc_energy_error=0.0;
+    curr.clear();
+    init();
 }
 
-void PhysicsEngine::register_variables(PhysicsObject *object,Variable *v1, Variable *v2, Variable *v3, Variable *v4, Variable *v5, Variable *v6, Variable *v7, Variable *v8, Variable *v9, Variable *v10)
+void PhysicsEngine::register_variables(PhysicsObject *object, bool eq_variable,Variable *v1, Variable *v2, Variable *v3, Variable *v4, Variable *v5, Variable *v6, Variable *v7, Variable *v8, Variable *v9, Variable *v10)
 {
-    Variable *vs[]={v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,0};
-    int old_size=variables.size();
+    Variable *vs[]={v1,v2,v3,v4,v5,v6,v7,v8,v9,v10};
     for (int v=0;vs[v];v++)
     {
-        vs[v]->nr=variables.size();
+        vs[v]->pos=-1;
+        vs[v]->nr=-1;
+        vs[v]->engine=this;
         vs[v]->object=object;
-        variables.append(vs[v]);
+        if (eq_variable)
+        {
+            Q_ASSERT(dynamic_cast<RealVariable*>(vs[v])!=0);
+            eq_variables.append(dynamic_cast<RealVariable*>(vs[v]));
+        }
+        else
+            variables.append(vs[v]);
     }
-#ifdef USE_ARMADILLO
-    arma::mat A_old=A;
-    arma::vec B_old=B;
-    A.resize(variables.size(),variables.size());
-    A.fill(0);
-    B.resize(variables.size());
-    B.fill(0);
-    for(int y=0;y!=old_size;y++)
-    {
-        B[y]=B_old[y];
-        for (int x=0;x!=old_size;x++)
-            A(y,x)=A_old(y,x);
-    }
-#else
-    size=variables.size();
-    size2=variables.size()+1;
-    int old_size2=old_size+1;
-    QVector<qreal> matrix_old=matrix;
-    matrix.resize(size*size2);
-    matrix.fill(0);
-    for(int y=0;y!=old_size;y++)
-    {
-        memcpy(matrix.data()+y*size2,matrix_old.data()+y*old_size2,old_size*sizeof(qreal));
-        B(y)=matrix_old[y*old_size2+old_size];
-    }
-#endif
 }
 
 void PhysicsEngine::register_energies(PhysicsObject *object,Energy *e1, Energy *e2, Energy *e3, Energy *e4, Energy *e5, Energy *e6, Energy *e7, Energy *e8, Energy *e9, Energy *e10)
@@ -88,22 +103,16 @@ void PhysicsEngine::register_energies(PhysicsObject *object,Energy *e1, Energy *
     energy_matix.resize(energies.size()*energies.size());
 }
 
-void PhysicsEngine::register_states(PhysicsObject *object, State *s1, State *s2, State *s3, State *s4, State *s5, State *s6, State *s7, State *s8, State *s9, State *s10)
-{
-    State *s[]={s1,s2,s3,s4,s5,s6,s7,s8,s9,s10};
-    for (int e=0;s[e];e++)
-    {
-        s[e]->nr=energies.size();
-        s[e]->object=object;
-        states.append(s[e]);
-    }
 
-}
 
-void PhysicsEngine::iteration()
+bool PhysicsEngine::iteration()
 {
+    //qDebug() << "iteration";
     if (e_check_iteration==0)
         delta_t=set_delta_t;
+
+ //   for(int i=0;i!=objects.size();i++)
+ //       objects[i]->post_iteration();
 
 #ifdef USE_ARMADILLO
     A.fill(0);
@@ -114,12 +123,28 @@ void PhysicsEngine::iteration()
     for(int i=0;i!=objects.size();i++)
         objects[i]->setup_equations();
 
-//    std::cout << A << std::endl;
-
 #ifdef USE_ARMADILLO
-    arma::vec X=arma::solve(A,B);
-    for (int v=0;v!=variables.size();v++)
-        variables[v]->next=X(v);
+    bool solveok=true;
+    arma::vec X;
+    try
+    {
+        X=arma::solve(A,B);
+    }
+    catch(std::runtime_error e)
+    {
+        solveok=false;
+    }
+    for (int v=0;solveok && v!=eq_variables.size();v++)
+        if (abs(eq_variables[v]->curr()-X(v))>1e3) solveok=false;
+    if (!solveok)
+    {
+        static int a=0;
+//        qDebug() << "using pinv" << a++;
+        X=arma::pinv(A,1e-5)*B;
+    }
+    for (int v=0;v!=eq_variables.size();v++)
+        eq_variables[v]->curr()=X(v);
+
 #else
 
     QVector<qreal> A=matrix;
@@ -127,14 +152,16 @@ void PhysicsEngine::iteration()
 
     if (!solve(A,size))
     {
-        qDebug() << "No solution";
+        qDebug() << "No solution" << e_check_iteration << delta_t;
         e_check_iteration++;
-        delta_t/=1.1;
+        delta_t/=2.1;
+        return false;
 //        exit(0);
     }
 
-    for (int v=0;v!=variables.size();v++)
-        variables[v]->curr=A.at(v*size2+size);
+
+    for (int v=0;v!=eq_variables.size();v++)
+        eq_variables[v]->curr()=A.at(v*size2+size);
 #endif
 
     for(int i=0;i!=objects.size();i++)
@@ -143,7 +170,8 @@ void PhysicsEngine::iteration()
     if (sub_iteration<max_subitarations)
     {
         sub_iteration++;
-        return;
+        prev=curr;
+        return true;
     }
 
     sub_iteration=0;
@@ -163,24 +191,19 @@ void PhysicsEngine::iteration()
     if (e_check_iteration<max_e_check_iterations && fabs(Edelta_error/delta_t*2.0)>energy_error_check)
     {
         delta_t=delta_t/2.0;
-        for (int v=0;v!=variables.size();v++)
-            variables[v]->curr=variables[v]->last_t;
-        for (int s=0;s!=states.size();s++)
-            states[s]->curr=states[s]->last_t;
+        curr=prev_t;
+        prev=prev_t;
 
         e_check_iteration++;
-        return;
+        return true;
     }
 
     e_check_iteration=0;
 
   //  qDebug() << "pass edelta" << Edelta_error;
 
-    for (int v=0;v!=variables.size();v++)
-        variables[v]->last_t=variables[v]->curr;
-
-    for (int s=0;s!=states.size();s++)
-        states[s]->last_t=states[s]->curr;
+    prev_t=curr;
+    prev=curr;
 
     acc_energy_error+=Edelta_error;
     if (k_energy_conserv)
@@ -194,6 +217,7 @@ void PhysicsEngine::iteration()
         k=set_k;
 
     t=t+delta_t;
+    return true;
 }
 
 Energy::Energy(const QString &name)
@@ -201,31 +225,18 @@ Energy::Energy(const QString &name)
 {}
 
 Variable::Variable(const QString &name)
-    : curr(0.0),last_t(0.0),name(name)
+    : _name(name)
 {}
 
-qreal Variable::operator =(const qreal & val)
-{
-    curr=val;
-    last_t=val;
-    return val;
-}
 
-State::State(const QString &name, const QVariant &init)
-    : name(name),curr(init),last_t(init)
+void PhysicsObject::register_eq_variables(RealVariable *v1, RealVariable *v2, RealVariable *v3, RealVariable *v4, RealVariable *v5, RealVariable *v6, RealVariable *v7, RealVariable *v8, RealVariable *v9, RealVariable *v10)
 {
-}
-
-const State & State::operator =(const QVariant & value)
-{
-    curr=value;
-    last_t=value;
-    return *this;
+    engine->register_variables(this,true,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10);
 }
 
 void PhysicsObject::register_variables(Variable *v1, Variable *v2, Variable *v3, Variable *v4, Variable *v5, Variable *v6, Variable *v7, Variable *v8, Variable *v9, Variable *v10)
 {
-    engine->register_variables(this,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10);
+    engine->register_variables(this,false,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10);
 }
 
 void PhysicsObject::register_energies(Energy *e1, Energy *e2, Energy *e3, Energy *e4, Energy *e5, Energy *e6, Energy *e7, Energy *e8, Energy *e9, Energy *e10)
@@ -233,10 +244,6 @@ void PhysicsObject::register_energies(Energy *e1, Energy *e2, Energy *e3, Energy
     engine->register_energies(this,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10);
 }
 
-void PhysicsObject::register_states(State *s1, State *s2, State *s3, State *s4, State *s5, State *s6, State *s7, State *s8, State *s9, State *s10)
-{
-    engine->register_states(this,s1,s2,s3,s4,s5,s6,s7,s8,s9,s10);
-}
 
 
 PhysicsObject::~PhysicsObject()

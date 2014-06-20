@@ -14,7 +14,7 @@ class Vector
 {
 public:
     Vector(const QString & name);
-    Variable x,y;
+    RealVariable x,y;
 };
 
 class Shape2D
@@ -44,11 +44,11 @@ class Mechanic2DObject : public PhysicsObject
 public:
     Mechanic2DObject(Mechanic2DWorld *world,const QString & name,Shape2D * shape);
     Vector p;
-    Variable theta;
+    RealVariable theta;
     Energy Ex,Ey,Ew;
     Mechanic2DWorld *world;
     QList<Vector*> pos_forces,neg_forces;
-    QList<Variable*> pos_torque;
+    QList<RealVariable*> pos_torque;
     Shape2D *shape;
 };
 
@@ -77,7 +77,7 @@ public:
     MassObject(Mechanic2DWorld *world,const QString & name, Shape2D *shape=0);
     ~MassObject();
     Vector v;
-    Variable w;
+    RealVariable w;
     qreal m,I;
 
     void calc_energy_diff();
@@ -124,7 +124,7 @@ class ConstTorque : public PhysicsObject
 {
 public:
     ConstTorque(Mechanic2DObject *object,const QString & name,qreal torque);
-    Variable t;
+    RealVariable t;
     Mechanic2DObject *object;
     qreal const_torque;
     virtual void setup_equations();

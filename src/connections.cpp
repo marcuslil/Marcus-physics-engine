@@ -3,13 +3,11 @@
 LoseConnection::LoseConnection(Mechanic2DObject *object1, Mechanic2DObject *object2, const QString &name)
     : PhysicsObject(object1->engine,name),Graphics2D(object1->world),f("f"),object1(object1),object2(object2)
 {
-    register_variables(&f.x,&f.y);
+    register_eq_variables(&f.x,&f.y);
     object1->pos_forces.append(&f);
     object2->neg_forces.append(&f);
-    f.x=0;
-    f.y=0;
-    qreal vx=object2->p.x.curr-object1->p.x.curr;
-    qreal vy=object2->p.y.curr-object1->p.y.curr;
+    qreal vx=object2->p.x.init-object1->p.x.init;
+    qreal vy=object2->p.y.init-object1->p.y.init;
     l=sqrt(vx*vx+vy*vy);
 
     line=new QGraphicsLineItem();
@@ -18,7 +16,7 @@ LoseConnection::LoseConnection(Mechanic2DObject *object1, Mechanic2DObject *obje
 
 void LoseConnection::update_graphics()
 {
-    line->setLine(object1->p.x.curr,object1->p.y.curr,object2->p.x.curr,object2->p.y.curr);
+    line->setLine(object1->p.x.curr(),object1->p.y.curr(),object2->p.x.curr(),object2->p.y.curr());
 }
 
 
@@ -27,8 +25,8 @@ void LoseConnection::setup_equations()
     int row=f.x.nr;
     //(ax-bx)^2+(bx-by)^2=l^2;
 
-    qreal vx=object1->p.x.curr-object2->p.x.curr;
-    qreal vy=object1->p.y.curr-object2->p.y.curr;
+    qreal vx=object1->p.x.curr()-object2->p.x.curr();
+    qreal vy=object1->p.y.curr()-object2->p.y.curr();
 
     engine->A(row,object1->p.x.nr)=vx;
     engine->A(row,object2->p.x.nr)=-vx;
@@ -52,25 +50,21 @@ void LoseConnection::calc_energy_diff()
 FixedConnection::FixedConnection(Mechanic2DObject *object1, Mechanic2DObject *object2, const QString &name, bool fix_both)
     : PhysicsObject(object1->engine,name),Graphics2D(object1->world),f("f"),tau1("tau"),tau2("tau2"),object1(object1),object2(object2),fix_both(fix_both)
 {
-    register_variables(&f.x,&f.y,&tau1);
+    register_eq_variables(&f.x,&f.y,&tau1);
     object1->pos_forces.append(&f);
     object2->neg_forces.append(&f);
     object1->pos_torque.append(&tau1);
     if (fix_both)
     {
-        register_variables(&tau2);
+        register_eq_variables(&tau2);
         object2->pos_torque.append(&tau2);
     }
 
-    f.x=0;
-    f.y=0;
-    tau1=0;
-    tau2=0;
-    qreal vx=object2->p.x.curr-object1->p.x.curr;
-    qreal vy=object2->p.y.curr-object1->p.y.curr;
+    qreal vx=object2->p.x.init-object1->p.x.init;
+    qreal vy=object2->p.y.init-object1->p.y.init;
     l=sqrt(vx*vx+vy*vy);
     if (l!=0.0)
-        theta_1=atan2(vy,vx)-object1->theta.curr;
+        theta_1=atan2(vy,vx)-object1->theta.init;
     else
         theta_1=0.0;
 
@@ -80,7 +74,7 @@ FixedConnection::FixedConnection(Mechanic2DObject *object1, Mechanic2DObject *ob
 
 void FixedConnection::update_graphics()
 {
-    line->setLine(object1->p.x.curr,object1->p.y.curr,object2->p.x.curr,object2->p.y.curr);
+    line->setLine(object1->p.x.curr(),object1->p.y.curr(),object2->p.x.curr(),object2->p.y.curr());
 }
 
 
@@ -88,7 +82,7 @@ void FixedConnection::setup_equations()
 {
     int row;
 
-    qreal theta_sum=object1->theta.curr+theta_1,
+    qreal theta_sum=object1->theta.curr()+theta_1,
             l_sin_theta=l*sin(theta_sum),
             l_cos_theta=l*cos(theta_sum);
 
@@ -96,13 +90,13 @@ void FixedConnection::setup_equations()
     engine->A(row,object1->p.x.nr)=-1.0;
     engine->A(row,object1->theta.nr)=l_sin_theta;
     engine->A(row,object2->p.x.nr)=1.0;
-    engine->B(row)=l_cos_theta+l_sin_theta*object1->theta.curr;
+    engine->B(row)=l_cos_theta+l_sin_theta*object1->theta.curr();
 
     row=f.y.nr;
     engine->A(row,object1->p.y.nr)=-1.0;
     engine->A(row,object1->theta.nr)=-l_cos_theta;
     engine->A(row,object2->p.y.nr)=1.0;
-    engine->B(row)=l_sin_theta-l_cos_theta*object1->theta.curr;
+    engine->B(row)=l_sin_theta-l_cos_theta*object1->theta.curr();
 
     row=tau1.nr;
     engine->A(row,f.x.nr)=l_sin_theta;
@@ -130,37 +124,35 @@ void FixedConnection::calc_energy_diff()
 Fix::Fix(Mechanic2DObject *object, const QString &name, bool fix_torque)
     : PhysicsObject(object->engine,name),f("f"),tau("tau"),object(object),fix_torque(fix_torque)
 {
-    register_variables(&f.x,&f.y);
+    register_eq_variables(&f.x,&f.y);
     object->pos_forces.append(&f);
     if (fix_torque)
     {
-        register_variables(&tau);
+        register_eq_variables(&tau);
         object->pos_torque.append(&tau);
     }
 
-    f.x=0;
-    f.y=0;
-    tau=0;
-    x=object->p.x.curr;
-    y=object->p.y.curr;
-    theta=object->theta.curr;
+    x=object->p.x.init;
+    y=object->p.y.init;
+    theta=object->theta.init;
 }
 
 void Fix::setup_equations()
 {
+    const qreal weight=100.0;
     int row=f.x.nr;
-    A(row,object->p.x.nr)=1.0;
-    B(row)=x;
+    A(row,object->p.x.nr)=weight;
+    B(row)=x*weight;
 
     row=f.y.nr;
-    A(row,object->p.y.nr)=1.0;
-    B(row)=y;
+    A(row,object->p.y.nr)=weight;
+    B(row)=y*weight;
 
     if (fix_torque)
     {
         row=tau.nr;
-        A(row,object->theta.nr)=1.0;
-        B(row)=theta;
+        A(row,object->theta.nr)=weight;
+        B(row)=theta*weight;
     }
 }
 

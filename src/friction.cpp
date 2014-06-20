@@ -3,15 +3,16 @@
 #include <QDebug>
 
 Friction::Friction(Mechanic2DObject *object1, Mechanic2DObject *object2, const QString &name)
-    : PhysicsObject(object1->engine,name),Graphics2D(object1->world),f("f"),tau1("tau1"),tau2("tau2"),state("state",0),angle("angle",0),angle2("angle2",0),length("length",0),index1("index1",0),index2("index2",0),object1(object1),object2(object2)
+    : PhysicsObject(object1->engine,name),Graphics2D(object1->world),f("f"),tau1("tau1"),tau2("tau2"),state("state"),prevstate("prevstate"),index1("index1"),index2("index2"),angle("angle"),angle2("angle2"),length("length"),object1(object1),object2(object2)
 {
-    register_variables(&f.x,&f.y,&tau1,&tau2);
-    register_states(&state,&angle,&angle2,&length,&index1,&index2);
+    register_eq_variables(&f.x,&f.y,&tau1,&tau2);
+    register_variables(&state,&prevstate,&angle,&angle2,&length,&index1,&index2);
     object1->pos_forces.append(&f);
     object2->neg_forces.append(&f);
     object1->pos_torque.append(&tau1);
     object2->pos_torque.append(&tau2);
-    state=(int)Free;
+    state.init=(int)Free;
+    prevstate.init=(int)Free;
     item=new QGraphicsEllipseItem(-0.1,-0.1,0.2,0.2);
     item->setVisible(false);
     item2=new QGraphicsEllipseItem(-0.1,-0.1,0.2,0.2);
@@ -33,7 +34,7 @@ bool point_cossed_line(QPointF l1_bef,QPointF l2_bef,QPointF p_bef,QPointF l1_af
     p_aft-=l1_aft;
     p_aft=QPointF(l2_aft.x()*p_aft.x()+l2_aft.y()*p_aft.y(),-l2_aft.y()*p_aft.x()+l2_aft.x()*p_aft.y())/length;
 
-    if (p_bef.y()<0 && p_aft.y()>=0)
+    if (p_bef.y()<0.00 && p_aft.y()>=-0.0)
     {
         x=(p_bef.y()*p_aft.x()-p_bef.x()*p_aft.y())/(p_bef.y()-p_aft.y());
         if (x>=0 && x<=length)
@@ -66,26 +67,38 @@ bool check_coll(Mechanic2DObject *object1,Mechanic2DObject *object2,int & line1,
         const qreal & r1=p1->radius.at(line),& r2=p1->radius.at(l_next);
         const qreal & a1=p1->angle.at(line), & a2=p1->angle.at(l_next);
 
-        QLineF line_last_t(object1->p.x.last_t+r1*cos(a1+object1->theta.last_t),
-                           object1->p.y.last_t+r1*sin(a1+object1->theta.last_t),
-                           object1->p.x.last_t+r2*cos(a2+object1->theta.last_t),
-                           object1->p.y.last_t+r2*sin(a2+object1->theta.last_t));
+#ifdef USE_PREV_T
+        QLineF line_last_t(object1->p.x.prev_t()+r1*cos(a1+object1->theta.prev_t()),
+                           object1->p.y.prev_t()+r1*sin(a1+object1->theta.prev_t()),
+                           object1->p.x.prev_t()+r2*cos(a2+object1->theta.prev_t()),
+                           object1->p.y.prev_t()+r2*sin(a2+object1->theta.prev_t()));
+#else
+        QLineF line_last_t(object1->p.x.prev()+r1*cos(a1+object1->theta.prev()),
+                           object1->p.y.prev()+r1*sin(a1+object1->theta.prev()),
+                           object1->p.x.prev()+r2*cos(a2+object1->theta.prev()),
+                           object1->p.y.prev()+r2*sin(a2+object1->theta.prev()));
+#endif
 
 
-        QLineF   line_curr(object1->p.x.curr+r1*cos(a1+object1->theta.curr),
-                           object1->p.y.curr+r1*sin(a1+object1->theta.curr),
-                           object1->p.x.curr+r2*cos(a2+object1->theta.curr),
-                           object1->p.y.curr+r2*sin(a2+object1->theta.curr));
+        QLineF   line_curr(object1->p.x.curr()+r1*cos(a1+object1->theta.curr()),
+                           object1->p.y.curr()+r1*sin(a1+object1->theta.curr()),
+                           object1->p.x.curr()+r2*cos(a2+object1->theta.curr()),
+                           object1->p.y.curr()+r2*sin(a2+object1->theta.curr()));
 
         for (int point=point_first;point<=point_last;point++)
         {
             const qreal & r=p2->radius.at(point),& a=p2->angle.at(point);
 
-            QPointF point_last_t(object2->p.x.last_t+r*cos(a+object2->theta.last_t),
-                                 object2->p.y.last_t+r*sin(a+object2->theta.last_t));
+#ifdef USE_PREV_T
+            QPointF point_last_t(object2->p.x.prev_t()+r*cos(a+object2->theta.prev_t()),
+                                 object2->p.y.prev_t()+r*sin(a+object2->theta.prev_t()));
+#else
+            QPointF point_last_t(object2->p.x.prev()+r*cos(a+object2->theta.prev()),
+                                 object2->p.y.prev()+r*sin(a+object2->theta.prev()));
+#endif
 
-            QPointF   point_curr(object2->p.x.curr+r*cos(a+object2->theta.curr),
-                                 object2->p.y.curr+r*sin(a+object2->theta.curr));
+            QPointF   point_curr(object2->p.x.curr()+r*cos(a+object2->theta.curr()),
+                                 object2->p.y.curr()+r*sin(a+object2->theta.curr()));
 
 
       //      qDebug() << "testing: point nr " << point_2 << "(" << point << ") on " <<object2->name << "if crossed line nr" << line_1 << "(" << line << ") on " << object1->name;
@@ -108,35 +121,86 @@ bool check_coll(Mechanic2DObject *object1,Mechanic2DObject *object2,int & line1,
 
 }
 
+bool rs2(QPointF l1_aft,QPointF l2_aft,QPointF p_aft)
+{
+    QPointF v=l1_aft-l2_aft;
+    qreal length=sqrt(v.x()*v.x()+v.y()*v.y());
+
+    l2_aft-=l1_aft;
+    p_aft-=l1_aft;
+    p_aft=QPointF(l2_aft.x()*p_aft.x()+l2_aft.y()*p_aft.y(),-l2_aft.y()*p_aft.x()+l2_aft.x()*p_aft.y())/length;
+
+    if (p_aft.y()>=0)
+    {
+            return true;
+    }
+    return false;
+
+}
+
+
+bool right_side(Mechanic2DObject *object1,Mechanic2DObject *object2,int line,int point)
+{
+    ShapePolygon *p1=dynamic_cast<ShapePolygon*> (object1->shape);
+    ShapePolygon *p2=dynamic_cast<ShapePolygon*> (object2->shape);
+
+
+
+    int l_next=line==p1->points.size()-1?0:line+1;
+    const qreal & r1=p1->radius.at(line),& r2=p1->radius.at(l_next);
+    const qreal & a1=p1->angle.at(line), & a2=p1->angle.at(l_next);
+
+    QLineF   line_curr(object1->p.x.curr()+r1*cos(a1+object1->theta.curr()),
+                       object1->p.y.curr()+r1*sin(a1+object1->theta.curr()),
+                       object1->p.x.curr()+r2*cos(a2+object1->theta.curr()),
+                       object1->p.y.curr()+r2*sin(a2+object1->theta.curr()));
+
+    const qreal & r=p2->radius.at(point),& a=p2->angle.at(point);
+
+    QPointF   point_curr(object2->p.x.curr()+r*cos(a+object2->theta.curr()),
+                         object2->p.y.curr()+r*sin(a+object2->theta.curr()));
+
+
+    static int hitnr=0;
+    if (rs2(line_curr.p1(),line_curr.p2(),point_curr))
+    {
+        qDebug() << hitnr++<< "hit: point nr " << point << " on " << object2->name << " wrong side off " << line << "on " << object1->name;
+        return true;
+    }
+
+    return false;
+
+}
+
 void Friction::setup_equations()
 {
     int row;
-    if (state.curr==Free)
+    if (state.curr()==Free)
     {
         A(f.x.nr,f.x.nr)=1.0;
         A(f.y.nr,f.y.nr)=1.0;
         A(tau1.nr,tau1.nr)=1.0;
         A(tau2.nr,tau2.nr)=1.0;
     }
-    else if (state.curr==Line1_to_Point2_fixed || state.curr==Point1_to_Line2_fixed)
+    else if (state.curr()==Line1_to_Point2_fixed || state.curr()==Point1_to_Line2_fixed)
     {
         qreal r1sin,r1cos,r2sin,r2cos;
 
-        if (state.curr==Line1_to_Point2_fixed)
+        if (state.curr()==Line1_to_Point2_fixed)
         {
             ShapePolygon *p=dynamic_cast<ShapePolygon*>(object2->shape);
-            r1sin=length.curr.toDouble()*sin(angle.curr.toDouble()+object1->theta.curr);
-            r1cos=length.curr.toDouble()*cos(angle.curr.toDouble()+object1->theta.curr);
-            r2sin=p->radius.at(index2.curr.toInt())*sin(p->angle.at(index2.curr.toInt())+object2->theta.curr);
-            r2cos=p->radius.at(index2.curr.toInt())*cos(p->angle.at(index2.curr.toInt())+object2->theta.curr);
+            r1sin=length.curr()*sin(angle.curr()+object1->theta.curr());
+            r1cos=length.curr()*cos(angle.curr()+object1->theta.curr());
+            r2sin=p->radius.at(index2.curr())*sin(p->angle.at(index2.curr())+object2->theta.curr());
+            r2cos=p->radius.at(index2.curr())*cos(p->angle.at(index2.curr())+object2->theta.curr());
         }
         else
         {
             ShapePolygon *p=dynamic_cast<ShapePolygon*>(object1->shape);
-            r1sin=p->radius.at(index2.curr.toInt())*sin(p->angle.at(index2.curr.toInt())+object1->theta.curr);
-            r1cos=p->radius.at(index2.curr.toInt())*cos(p->angle.at(index2.curr.toInt())+object1->theta.curr);
-            r2sin=length.curr.toDouble()*sin(angle.curr.toDouble()+object2->theta.curr);
-            r2cos=length.curr.toDouble()*cos(angle.curr.toDouble()+object2->theta.curr);
+            r1sin=p->radius.at(index2.curr())*sin(p->angle.at(index2.curr())+object1->theta.curr());
+            r1cos=p->radius.at(index2.curr())*cos(p->angle.at(index2.curr())+object1->theta.curr());
+            r2sin=length.curr()*sin(angle.curr()+object2->theta.curr());
+            r2cos=length.curr()*cos(angle.curr()+object2->theta.curr());
         }
         //eq1
         row=f.x.nr;
@@ -144,7 +208,7 @@ void Friction::setup_equations()
         A(row,object1->theta.nr)=-r1sin;
         A(row,object2->p.x.nr)=-1.0;
         A(row,object2->theta.nr)=r2sin;
-        B(row)=-r1cos-r1sin*object1->theta.curr+r2cos+r2sin*object2->theta.curr;
+        B(row)=-r1cos-r1sin*object1->theta.curr()+r2cos+r2sin*object2->theta.curr();
 
         //eq2
         row=f.y.nr;
@@ -152,7 +216,7 @@ void Friction::setup_equations()
         A(row,object1->theta.nr)=r1cos;
         A(row,object2->p.y.nr)=-1.0;
         A(row,object2->theta.nr)=-r2cos;
-        B(row)=-r1sin+r1cos*object1->theta.curr+r2sin-r2cos*object2->theta.curr;
+        B(row)=-r1sin+r1cos*object1->theta.curr()+r2sin-r2cos*object2->theta.curr();
 
         //eq3
         row=tau1.nr;
@@ -166,23 +230,23 @@ void Friction::setup_equations()
         A(row,f.y.nr)=r2cos;
         A(row,tau2.nr)=1.0;
     }
-    else if (state.curr==Line1_to_Line2_fixed)
+    else if (state.curr()==Line1_to_Line2_fixed)
     {
-        qreal theta_sum=object1->theta.curr+angle.curr.toDouble(),
-                l_sin_theta=length.curr.toDouble()*sin(theta_sum),
-                l_cos_theta=length.curr.toDouble()*cos(theta_sum);
+        qreal theta_sum=object1->theta.curr()+angle.curr(),
+                l_sin_theta=length.curr()*sin(theta_sum),
+                l_cos_theta=length.curr()*cos(theta_sum);
 
         row=f.x.nr;
         engine->A(row,object1->p.x.nr)=-1.0;
         engine->A(row,object1->theta.nr)=l_sin_theta;
         engine->A(row,object2->p.x.nr)=1.0;
-        engine->B(row)=l_cos_theta+l_sin_theta*object1->theta.curr;
+        engine->B(row)=l_cos_theta+l_sin_theta*object1->theta.curr();
 
         row=f.y.nr;
         engine->A(row,object1->p.y.nr)=-1.0;
         engine->A(row,object1->theta.nr)=-l_cos_theta;
         engine->A(row,object2->p.y.nr)=1.0;
-        engine->B(row)=l_sin_theta-l_cos_theta*object1->theta.curr;
+        engine->B(row)=l_sin_theta-l_cos_theta*object1->theta.curr();
 
         row=tau1.nr;
         engine->A(row,f.x.nr)=l_sin_theta;
@@ -191,14 +255,33 @@ void Friction::setup_equations()
         engine->A(row,tau2.nr)=1.0;
 
 //        -theta1+theta2-angle2=0;
-        while(-object1->theta.curr+object2->theta.curr-angle2.curr.toDouble()>M_PI)
-            angle2.curr=angle2.curr.toDouble()+2.0*M_PI; //,qDebug() << Q_FUNC_INFO << "Adjust angle +2pi";
-        while(-object1->theta.curr+object2->theta.curr-angle2.curr.toDouble()<-M_PI)
-            angle2.curr=angle2.curr.toDouble()-2.0*M_PI; //,qDebug() << Q_FUNC_INFO << "Adjust angle -2pi";
+        int l1=0,l2=0;
+        while(-object1->theta.curr()+object2->theta.curr()-angle2.curr()>M_PI && l1<200)
+        {
+            angle2.curr()=angle2.curr()+2.0*M_PI; //,qDebug() << Q_FUNC_INFO << "Adjust angle +2pi";
+            l1++;
+            if (l1>100)
+            {
+                //qDebug() << Q_FUNC_INFO << l1 <<object1->theta.curr() << object2->theta.curr() << angle2.curr();
+               // return;
+
+//                exit(0);
+            }
+        }
+        while(-object1->theta.curr()+object2->theta.curr()-angle2.curr()<-M_PI && l2<200)
+        {
+            angle2.curr()=angle2.curr()-2.0*M_PI; //,qDebug() << Q_FUNC_INFO << "Adjust angle -2pi";
+            l2++;
+            if (l2>100)
+            {
+                //qDebug() << Q_FUNC_INFO << l1<< l2<<object1->theta.curr() << object1->theta.prev_t() << object2->theta.curr() << angle2.curr();
+  //              exit(0);
+            }
+        }
         row=tau2.nr;
         engine->A(row,object1->theta.nr)=-1.0;
         engine->A(row,object2->theta.nr)=1.0;
-        B(row)=angle2.curr.toDouble();
+        B(row)=angle2.curr();
     }
 }
 
@@ -218,7 +301,7 @@ void Friction::post_iteration()
 {
     int _line,_point;
     qreal dist;
-    if (state.curr==Free)
+    if (state.curr()==Free)
     {
         bool swap=false;
         if (check_coll(object1,object2,_line,_point,dist) ||  (swap=check_coll(object2,object1,_line,_point,dist)))
@@ -226,85 +309,91 @@ void Friction::post_iteration()
             ShapePolygon *p1;
             if (!swap)
             {
-                state.curr=Line1_to_Point2_fixed;
+                state.curr()=Line1_to_Point2_fixed;
                 p1=dynamic_cast<ShapePolygon*> (object1->shape);
             }
             else
             {
-                state.curr=Point1_to_Line2_fixed;
+                state.curr()=Point1_to_Line2_fixed;
                 p1=dynamic_cast<ShapePolygon*> (object2->shape);
             }
 
-            index1.curr=_line;
-            index2.curr=_point;
+            index1.curr()=_line;
+            index2.curr()=_point;
 
             QPointF point_on_line=p1->points.at(_line);
             QPointF dir=p1->points.at((_line+1)%p1->points.size())-point_on_line;
             dir*=dist/vector_length(dir);
             point_on_line+=dir;
-            length.curr=vector_length(point_on_line);
-            angle.curr=atan2(point_on_line.y(),point_on_line.x());
+            length.curr()=vector_length(point_on_line);
+            angle.curr()=atan2(point_on_line.y(),point_on_line.x());
+            //post_iteration();
         }
     }
 
-    if (state.curr==Line1_to_Point2_fixed || state.curr==Point1_to_Line2_fixed)
+    if (state.curr()==Line1_to_Point2_fixed || state.curr()==Point1_to_Line2_fixed)
     {
         ShapePolygon *p1=dynamic_cast<ShapePolygon*> (object1->shape);
         ShapePolygon *p2=dynamic_cast<ShapePolygon*> (object2->shape);
 
-        int i1=index1.curr.toInt();
-        int i2=index2.curr.toInt();
-        int i1max=state.curr==Line1_to_Line2_fixed?p1->points.size():p2->points.size();
-        int i2max=state.curr==Line1_to_Line2_fixed?p2->points.size():p1->points.size();
+        int i1=index1.curr();
+        int i2=index2.curr();
+        int i1max=state.curr()==Line1_to_Line2_fixed?p1->points.size():p2->points.size();
+        int i2max=state.curr()==Line1_to_Line2_fixed?p2->points.size():p1->points.size();
         int i1p1=(i1+1)%i1max;
 //        int i1m1=(i1-1+i1max)%i1max;
         int i2m1=(i2-1+i2max)%i2max;
         int i2p1=(i2+1)%i2max;
 
-
-        if (state.curr==Line1_to_Point2_fixed)
+        if (state.curr()==Line1_to_Point2_fixed)
         {
             const qreal & theta1=p1->angle.at(i1);
             const qreal alpha2=theta1+M_PI-p1->inner_angle.at(i1);
 
-            const qreal a3=alpha2+object1->theta.curr;
+            const qreal a3=alpha2+object1->theta.curr();
 
-            const qreal Fh=f.x.curr*cos(a3)+f.y.curr*sin(a3);
-            const qreal Fv=f.x.curr*cos(a3+M_PI/2.0)+f.y.curr*sin(a3+M_PI/2.0);
+          //  const qreal Fh=f.x.curr()*cos(a3)+f.y.curr()*sin(a3);
+            const qreal Fv=f.x.curr()*cos(a3+M_PI/2.0)+f.y.curr()*sin(a3+M_PI/2.0);
 
             if (Fv<-0.001)
             {
-                qDebug() << "goto free1";
-                state.curr=Free;
+              //  qDebug() << "goto free1";
+                state.curr()=Free;
+                //post_iteration();
             }
-//            qDebug() << Fv;
         }
 
-        if (state.curr==Point1_to_Line2_fixed)
+        if (state.curr()==Point1_to_Line2_fixed)
         {
             const qreal & theta1=p2->angle.at(i1);
             const qreal alpha2=theta1+M_PI-p2->inner_angle.at(i1);
 
-            const qreal a3=alpha2+object2->theta.curr;
+            const qreal a3=alpha2+object2->theta.curr();
 
-            const qreal Fh=f.x.curr*cos(a3)+f.y.curr*sin(a3);
-            const qreal Fv=f.x.curr*cos(a3+M_PI/2.0)+f.y.curr*sin(a3+M_PI/2.0);
+            //const qreal Fh=f.x.curr()*cos(a3)+f.y.curr()*sin(a3);
+            const qreal Fv=f.x.curr()*cos(a3+M_PI/2.0)+f.y.curr()*sin(a3+M_PI/2.0);
 
             if (Fv>0.001)
             {
-                qDebug() << "goto free2";
-                state.curr=Free;
+                //qDebug() << "goto free2";
+                state.curr()=Free;
+                //post_iteration();
             }
-//            qDebug() << Fv;
+            else if (state.prev()==Line1_to_Line2_fixed)
+            {
+//                && right_side(object1,object2,index1.prev(),index2.prev()))
+
+                qDebug() << "state is Point1_to_Line2_fixed prev state was line1_line2";
+            }
         }
 
 
-        if (state.curr==Line1_to_Point2_fixed && (check_coll(object2,object1,i2m1,i1p1,dist,true) || check_coll(object1,object2,i1,i2m1,dist,true) ))
+        if (state.curr()==Line1_to_Point2_fixed && (check_coll(object2,object1,i2m1,i1p1,dist,true) || check_coll(object1,object2,i1,i2m1,dist,true) ))
         {
-            qDebug() << "second hit 1";       
+           // qDebug() << "second hit 1";
 
             const qreal & theta1=p1->angle.at(i1);
-            const qreal & theta2=angle.curr.toDouble();
+            const qreal & theta2=angle.curr();
             const qreal & theta3=p2->adj_inner_angle.at(i2m1);
             const qreal & theta4=p1->inner_angle.at(i1);
             const qreal & theta5=p2->angle.at(i2);
@@ -314,21 +403,21 @@ void Friction::post_iteration()
             qreal alpha3=theta2+alpha2-theta3;
             qreal alpha4=M_PI-theta5+alpha3;
 
-            qreal vx=length.curr.toDouble()*cos(theta2)+p2->radius.at(i2)*cos(alpha3);
-            qreal vy=length.curr.toDouble()*sin(theta2)+p2->radius.at(i2)*sin(alpha3);
+            qreal vx=length.curr()*cos(theta2)+p2->radius.at(i2)*cos(alpha3);
+            qreal vy=length.curr()*sin(theta2)+p2->radius.at(i2)*sin(alpha3);
 
-            state.curr=Line1_to_Line2_fixed;
-            length.curr=vector_length(QPointF(vx,vy));
-            angle.curr=atan2(vy,vx);
-            angle2.curr=alpha4;
-            index1.curr=i1;
-            index2.curr=i2m1;
+            state.curr()=Line1_to_Line2_fixed;
+            length.curr()=vector_length(QPointF(vx,vy));
+            angle.curr()=atan2(vy,vx);
+            angle2.curr()=alpha4;
+            index1.curr()=i1;
+            index2.curr()=i2m1;
         }
-        else if (state.curr==Point1_to_Line2_fixed && (check_coll(object1,object2,i2m1,i1p1,dist,true) || check_coll(object2,object1,i1,i2m1,dist,true) ))
+        else if (state.curr()==Point1_to_Line2_fixed && (check_coll(object1,object2,i2m1,i1p1,dist,true) || check_coll(object2,object1,i1,i2m1,dist,true) ))
         {
-            qDebug() << "second hit 1 222";
+           // qDebug() << "second hit 1 222";
             const qreal & theta1=p2->angle.at(i1);
-            const qreal & theta2=angle.curr.toDouble();
+            const qreal & theta2=angle.curr();
             const qreal & theta3=p1->adj_inner_angle.at(i2m1);
             const qreal & theta4=p2->inner_angle.at(i1);
             const qreal & theta5=p1->angle.at(i2);
@@ -336,27 +425,27 @@ void Friction::post_iteration()
             qreal alpha1=theta2-theta1;
             qreal alpha2=M_PI-theta4-alpha1;
             qreal alpha3=theta2+alpha2-theta3;
-            qreal alpha4=M_PI-theta5+alpha3;
+           // qreal alpha4=M_PI-theta5+alpha3;
             qreal alpha7=theta5-alpha3+theta2;
             qreal alpha8=alpha7+1.0*M_PI-theta2;
 
-            qreal vx=length.curr.toDouble()*cos(alpha7)+p1->points.at(i2).x();
-            qreal vy=length.curr.toDouble()*sin(alpha7)+p1->points.at(i2).y();
+            qreal vx=length.curr()*cos(alpha7)+p1->points.at(i2).x();
+            qreal vy=length.curr()*sin(alpha7)+p1->points.at(i2).y();
 
-            state.curr=Line1_to_Line2_fixed;
-            length.curr=vector_length(QPointF(vx,vy));
-            angle.curr=atan2(vy,vx);
-            angle2.curr=alpha8;
-            index1.curr=i2m1;
-            index2.curr=i1;
+            state.curr()=Line1_to_Line2_fixed;
+            length.curr()=vector_length(QPointF(vx,vy));
+            angle.curr()=atan2(vy,vx);
+            angle2.curr()=alpha8;
+            index1.curr()=i2m1;
+            index2.curr()=i1;
 
         }
-        else if (state.curr==Line1_to_Point2_fixed && (check_coll(object1,object2,i1,i2p1,dist,true) || check_coll(object2,object1,i2,i1,dist,true)))
+        else if (state.curr()==Line1_to_Point2_fixed && (check_coll(object1,object2,i1,i2p1,dist,true) || check_coll(object2,object1,i2,i1,dist,true)))
         {
-            qDebug() << "second hit2";
+          //  qDebug() << "second hit2";
 
             const qreal & theta1=p1->angle.at(i1);
-            const qreal & theta2=angle.curr.toDouble();
+            const qreal & theta2=angle.curr();
             const qreal & theta3=p2->inner_angle.at(i2);
             const qreal & theta4=p1->inner_angle.at(i1);
             const qreal & theta5=p2->angle.at(i2);
@@ -366,61 +455,62 @@ void Friction::post_iteration()
             qreal alpha3=theta2-M_PI+(alpha2+theta3);
             qreal alpha4=M_PI-theta5+alpha3;
 
-            qreal vx=length.curr.toDouble()*cos(theta2)+p2->radius.at(i2)*cos(alpha3);
-            qreal vy=length.curr.toDouble()*sin(theta2)+p2->radius.at(i2)*sin(alpha3);
+            qreal vx=length.curr()*cos(theta2)+p2->radius.at(i2)*cos(alpha3);
+            qreal vy=length.curr()*sin(theta2)+p2->radius.at(i2)*sin(alpha3);
 
-            state.curr=Line1_to_Line2_fixed;
-            length.curr=vector_length(QPointF(vx,vy));
-            angle.curr=atan2(vy,vx);
-            angle2.curr=alpha4;
-            index1.curr=i1;
-            index2.curr=i2;
+            state.curr()=Line1_to_Line2_fixed;
+            length.curr()=vector_length(QPointF(vx,vy));
+            angle.curr()=atan2(vy,vx);
+            angle2.curr()=alpha4;
+            index1.curr()=i1;
+            index2.curr()=i2;
         }
-        else if (state.curr==Point1_to_Line2_fixed && (check_coll(object2,object1,i1,i2p1,dist,true) || check_coll(object1,object2,i2,i1,dist,true)))
+        else if (state.curr()==Point1_to_Line2_fixed && (check_coll(object2,object1,i1,i2p1,dist,true) || check_coll(object1,object2,i2,i1,dist,true)))
         {
-            qDebug() << "second hit2 222";
+          //  qDebug() << "second hit2 222";
 
             const qreal & theta1=p2->angle.at(i1);
-            const qreal theta2=angle.curr.toDouble(); //-angle2.curr.toDouble();
+            const qreal theta2=angle.curr(); //-angle2.curr();
             const qreal & theta3=p1->inner_angle.at(i2);
             const qreal & theta4=p2->inner_angle.at(i1);
             const qreal & theta5=p1->angle.at(i2);
 
             qreal alpha1=theta2-theta1;
             qreal alpha2=M_PI-theta4-alpha1;
-            qreal alpha3=theta2-M_PI+(alpha2+theta3);
+            //qreal alpha3=theta2-M_PI+(alpha2+theta3);
             qreal alpha5=theta5+M_PI-(theta3+alpha2);
 //            qreal alpha4=M_PI-theta5+alpha3;
             qreal alpha6=alpha5+M_PI-theta2;
 
 //            qDebug() << theta2 << alpha3 << theta1;
 
-            qreal vx=length.curr.toDouble()*cos(alpha5)+p1->points.at(i2).x();
-            qreal vy=length.curr.toDouble()*sin(alpha5)+p1->points.at(i2).y();
+            qreal vx=length.curr()*cos(alpha5)+p1->points.at(i2).x();
+            qreal vy=length.curr()*sin(alpha5)+p1->points.at(i2).y();
 
 
   //          qDebug() << vx << vy;
-            state.curr=Line1_to_Line2_fixed;
+            state.curr()=Line1_to_Line2_fixed;
 
-//            vx=object2->p.x.curr-object1->p.x.curr;
-//            vy=object2->p.y.curr-object1->p.y.curr;
+//            vx=object2->p.x.curr()-object1->p.x.curr();
+//            vy=object2->p.y.curr()-object1->p.y.curr();
 
-            length.curr=vector_length(QPointF(vx,vy));
-            angle.curr=atan2(vy,vx); //+M_PI/2.0;
-            angle2.curr=alpha6; //+M_PI/2.0; //alpha4;
- //           angle2.curr=object2->theta.curr-object1->theta.curr+angle.curr.toDouble();
-            index1.curr=i2;
-            index2.curr=i1;
+            length.curr()=vector_length(QPointF(vx,vy));
+            angle.curr()=atan2(vy,vx); //+M_PI/2.0;
+            angle2.curr()=alpha6; //+M_PI/2.0; //alpha4;
+ //           angle2.curr()=object2->theta.curr()-object1->theta.curr()+angle.curr();
+            index1.curr()=i2;
+            index2.curr()=i1;
+            //post_iteration();
         }
 
     }
-    else if (state.curr==Line1_to_Line2_fixed)
+    else if (state.curr()==Line1_to_Line2_fixed)
     {
         //return;
         const ShapePolygon & p1=dynamic_cast<const ShapePolygon&> (*object1->shape);
         const ShapePolygon & p2=dynamic_cast<const ShapePolygon&> (*object2->shape);
-        const int i1=index1.curr.toInt();
-        const int i2=index2.curr.toInt();
+        const int i1=index1.curr();
+        const int i2=index2.curr();
         const int i1p1=(i1+1)%p1.points.size();
         const int i2p1=(i2+1)%p2.points.size();
 //        const int i1m1=(i1+p1.points.size()-1)%p1.points.size();
@@ -429,17 +519,17 @@ void Friction::post_iteration()
         const qreal & theta1=p1.angle.at(i1);
         const qreal alpha2=theta1+M_PI-p1.inner_angle.at(i1);
 
-        const qreal a3=alpha2+object1->theta.curr;
+        const qreal a3=alpha2+object1->theta.curr();
 
-        const qreal Fh=f.x.curr*cos(a3)+f.y.curr*sin(a3);
-        const qreal Fv=f.x.curr*cos(a3+M_PI/2.0)+f.y.curr*sin(a3+M_PI/2.0);
+        const qreal Fh=f.x.curr()*cos(a3)+f.y.curr()*sin(a3);
+        const qreal Fv=f.x.curr()*cos(a3+M_PI/2.0)+f.y.curr()*sin(a3+M_PI/2.0);
 
-        QPointF o2c=length.curr.toDouble()*QPointF(cos(angle.curr.toDouble()),sin(angle.curr.toDouble()));
+        QPointF o2c=length.curr()*QPointF(cos(angle.curr()),sin(angle.curr()));
 
         const QPointF o1p1=p1.radius.at(i1  )*QPointF(cos(p1.angle.at(i1  )),sin(p1.angle.at(i1  )));
         const QPointF o1p2=p1.radius.at(i1p1)*QPointF(cos(p1.angle.at(i1p1)),sin(p1.angle.at(i1p1)));
-        const QPointF o2p1=o2c+p2.radius.at(i2  )*QPointF(cos(angle2.curr.toDouble()+p2.angle.at(i2  )),sin(angle2.curr.toDouble()+p2.angle.at(i2  )));
-        const QPointF o2p2=o2c+p2.radius.at(i2p1)*QPointF(cos(angle2.curr.toDouble()+p2.angle.at(i2p1)),sin(angle2.curr.toDouble()+p2.angle.at(i2p1)));
+        const QPointF o2p1=o2c+p2.radius.at(i2  )*QPointF(cos(angle2.curr()+p2.angle.at(i2  )),sin(angle2.curr()+p2.angle.at(i2  )));
+        const QPointF o2p2=o2c+p2.radius.at(i2p1)*QPointF(cos(angle2.curr()+p2.angle.at(i2p1)),sin(angle2.curr()+p2.angle.at(i2p1)));
 
         QPointF v=o1p2-o1p1;
         v/=vector_length(v);
@@ -462,73 +552,76 @@ void Friction::post_iteration()
         else
             x2=o2p1x,a2=false;
 
-        const qreal F1=-(Fh*y - tau1.curr + Fv*x2)/(x1 - x2);
-        const qreal F2= (Fh*y - tau1.curr + Fv*x1)/(x1 - x2);
+        const qreal F1=-(Fh*y - tau1.curr() + Fv*x2)/(x1 - x2);
+        const qreal F2= (Fh*y - tau1.curr() + Fv*x1)/(x1 - x2);
 
  //       qDebug() << "Fh" << Fh << "Fv" << Fv;
   //      qDebug() << "F1" << F1 << "F2" << F2;
 
-        const qreal negF=-0.0001;
+        const qreal negF=-0.001;
 
         if (F1<negF && F2<negF)
         {
             qDebug() << "F1<0 && F2<0";
+            //state.curr()=Free;
+            //post_iteration();
             return;
-            exit(0);
         }
 
         if (a2 && F1<negF)
         {
 
-            state.curr=Point1_to_Line2_fixed;
-            qDebug()<< "lossnar a2 && F1<0.0";
+            state.curr()=Point1_to_Line2_fixed;
+         //   qDebug()<< "lossnar a2 && F1<0.0";
 
-            index2.curr=i1p1;
-            index1.curr=i2;
+            index2.curr()=i1p1;
+            index1.curr()=i2;
 
             QPointF p=o1p2-o2c;
-            length.curr=vector_length(p);
-            angle.curr=atan2(p.y(),p.x())-angle2.curr.toDouble();
+            length.curr()=vector_length(p);
+            angle.curr()=atan2(p.y(),p.x())-angle2.curr();
         }
 
         if (!a2 && F1<negF)
         {
-            state.curr=Line1_to_Point2_fixed;
-            qDebug()<< "lossnar !a2 && F1<0.0";
+            state.curr()=Line1_to_Point2_fixed;
+          //  qDebug()<< "lossnar !a2 && F1<0.0";
 
-            index1.curr=i1;
-            index2.curr=i2;
+            index1.curr()=i1;
+            index2.curr()=i2;
 
             QPointF p=o2p1;
-            length.curr=vector_length(p);
-            angle.curr=atan2(p.y(),p.x());
-            //angle2.curr=
+            length.curr()=vector_length(p);
+            angle.curr()=atan2(p.y(),p.x());
+            //angle2.curr()=
         }
 
         if (!a1 && F2<negF)
         {
-            state.curr=Line1_to_Point2_fixed;
-            qDebug()<< "lossnar !a1 && F2<0.0";
+            state.curr()=Line1_to_Point2_fixed;
+         //   qDebug()<< "lossnar !a1 && F2<0.0";
 
-            index1.curr=i1;
-            index2.curr=i2p1;
+            index1.curr()=i1;
+            index2.curr()=i2p1;
 
             QPointF p=o2p2;
-            length.curr=vector_length(p);
-            angle.curr=atan2(p.y(),p.x());
+            length.curr()=vector_length(p);
+            angle.curr()=atan2(p.y(),p.x());
+            //post_iteration();
+            return;
         }
 
          if (a1 && F2<negF)
          {
-             qDebug()<< "lossnar a1 && F2<0.0";
-             state.curr=Point1_to_Line2_fixed;
+        //     qDebug()<< "lossnar a1 && F2<0.0";
+             state.curr()=Point1_to_Line2_fixed;
 
-             index2.curr=i1;
-             index1.curr=i2;
+             index2.curr()=i1;
+             index1.curr()=i2;
 
              QPointF p=o1p1-o2c;
-             length.curr=vector_length(p);
-             angle.curr=atan2(p.y(),p.x())-angle2.curr.toDouble();
+             length.curr()=vector_length(p);
+             angle.curr()=atan2(p.y(),p.x())-angle2.curr();
          }
 
     }
@@ -541,28 +634,28 @@ QLineF Friction::get_contact_line(bool world_coordinates)
 {
     const ShapePolygon  & p1=dynamic_cast<const ShapePolygon&> (*object1->shape);
     const ShapePolygon  & p2=dynamic_cast<const ShapePolygon&> (*object2->shape);
-    const int & i1=index1.curr.toInt();
-    const int & i2=index2.curr.toInt();
+    const int & i1=index1.curr();
+    const int & i2=index2.curr();
     int i1p1=(i1+1)%p1.points.size();
     int i2p1=(i2+1)%p2.points.size();
     QLineF l;
 
-    QPointF offset=length.curr.toDouble()*QPointF(cos(angle.curr.toDouble()),sin(angle.curr.toDouble()));
+    QPointF offset=length.curr()*QPointF(cos(angle.curr()),sin(angle.curr()));
     QPointF point1,point2;
 
     point1=p1.radius.at(i1)*QPointF(cos(p1.angle.at(i1)),sin(p1.angle.at(i1)));
-    point2=offset+p2.radius.at(i2p1)*QPointF(cos(angle2.curr.toDouble()+p2.angle.at(i2p1)),sin(angle2.curr.toDouble()+p2.angle.at(i2p1)));
+    point2=offset+p2.radius.at(i2p1)*QPointF(cos(angle2.curr()+p2.angle.at(i2p1)),sin(angle2.curr()+p2.angle.at(i2p1)));
     if (sin(atan2(point2.y(),point2.x())-p1.angle.at(i1))>0.0) l.setP1(point2); else l.setP1(point1);
 
     point1=p1.radius.at(i1p1)*QPointF(cos(p1.angle.at(i1p1)),sin(p1.angle.at(i1p1)));
-    point2=offset+p2.radius.at(i2)*QPointF(cos(angle2.curr.toDouble()+p2.angle.at(i2)),sin(angle2.curr.toDouble()+p2.angle.at(i2)));
+    point2=offset+p2.radius.at(i2)*QPointF(cos(angle2.curr()+p2.angle.at(i2)),sin(angle2.curr()+p2.angle.at(i2)));
     if (sin(atan2(point2.y(),point2.x())-p1.angle.at(i1p1))<0.0) l.setP2(point2); else l.setP2(point1);
 
     if (world_coordinates)
     {
         QTransform a;
-        a.translate(object1->p.x.curr,object1->p.y.curr);
-        a.rotateRadians(object1->theta.curr);
+        a.translate(object1->p.x.curr(),object1->p.y.curr());
+        a.rotateRadians(object1->theta.curr());
         l=a.map(l);
     }
     return l;
@@ -571,19 +664,19 @@ QLineF Friction::get_contact_line(bool world_coordinates)
 
 void Friction::update_graphics()
 {
-    if (state.curr==Line1_to_Point2_fixed || state.curr==Point1_to_Line2_fixed)
+    if (state.curr()==Line1_to_Point2_fixed || state.curr()==Point1_to_Line2_fixed)
     {
         item->setVisible(true);
         item2->setVisible(false);
         Mechanic2DObject *o1;
-        if (state.curr==Line1_to_Point2_fixed)
+        if (state.curr()==Line1_to_Point2_fixed)
             o1=object1;
         else
             o1=object2;
 
-        item->setPos(o1->p.x.curr+length.curr.toDouble()*cos(angle.curr.toDouble()+o1->theta.curr),o1->p.y.curr+length.curr.toDouble()*sin(angle.curr.toDouble()+o1->theta.curr));
+        item->setPos(o1->p.x.curr()+length.curr()*cos(angle.curr()+o1->theta.curr()),o1->p.y.curr()+length.curr()*sin(angle.curr()+o1->theta.curr()));
     }
-    else if (state.curr==Line1_to_Line2_fixed)
+    else if (state.curr()==Line1_to_Line2_fixed)
     {
         item->setVisible(true);
         item2->setVisible(true);
@@ -598,5 +691,5 @@ void Friction::update_graphics()
         item2->setVisible(false);
     }
 
- //   item->setPos(object1->p.x.curr+length1.curr.toDouble()*cos(angle1.curr.toDouble()+object1->theta.curr),object1->p.y.curr+length1.curr.toDouble()*sin(angle1.curr.toDouble()+object1->theta.curr));
+ //   item->setPos(object1->p.x.curr()+length1.curr.toDouble()*cos(angle1.curr.toDouble()+object1->theta.curr()),object1->p.y.curr()+length1.curr.toDouble()*sin(angle1.curr.toDouble()+object1->theta.curr()));
 }

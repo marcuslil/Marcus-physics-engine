@@ -73,7 +73,7 @@ Mechanic2DObject::Mechanic2DObject(Mechanic2DWorld *world, const QString &name, 
     : PhysicsObject(world->engine,name),p("p"),theta("theta"),Ex("Ex"),Ey("Ey"),Ew("Ew"),world(world),shape(shape)
 {
     world->objects.append(this);
-    register_variables(&p.x,&p.y,&theta);
+    register_eq_variables(&p.x,&p.y,&theta);
     register_energies(&Ex,&Ey,&Ew);
     if (this->shape==0)
     {
@@ -97,17 +97,9 @@ Mechanic2DObject::Mechanic2DObject(Mechanic2DWorld *world, const QString &name, 
 MassObject::MassObject(Mechanic2DWorld *world, const QString &name,Shape2D *shape)
     : Mechanic2DObject(world,name,shape),Graphics2D(world),v("v"),w("w")
 {
-    register_variables(&v.x,&v.y,&w); // p and theta already registered in Mechanic2DObject
-    //register_energies(&Ex,&Ey,&Ew); energies alrady registered
-    p.x=0;
-    p.y=0;
-    v.x=0;
-    v.y=0;
-    theta=0;
-    w=0;
-    m=1;
-    I=1;
-    update_graphics();
+    register_eq_variables(&v.x,&v.y,&w); // p and theta already registered in Mechanic2DObject
+    m=1.0;
+    I=1.0;
 }
 
 void MassObject::setup_equations()
@@ -117,13 +109,13 @@ void MassObject::setup_equations()
     row=p.x.nr;
     engine->A(row,p.x.nr)=1;
     engine->A(row,v.x.nr)=-engine->k*engine->delta_t;
-    engine->B(row)=p.x.last_t+v.x.last_t*engine->delta_t*(1.0-engine->k);
+    engine->B(row)=p.x.prev_t()+v.x.prev_t()*engine->delta_t*(1.0-engine->k);
 
 //    dpy/dt=vy; -> py_next-vy*dt=py
     row=p.y.nr;
     engine->A(row,p.y.nr)=1;
     engine->A(row,v.y.nr)=-engine->k*engine->delta_t;
-    engine->B(row)=p.y.last_t+v.y.last_t*engine->delta_t*(1.0-engine->k);
+    engine->B(row)=p.y.prev_t()+v.y.prev_t()*engine->delta_t*(1.0-engine->k);
 
 
     //   dvx/dt=1/m*sum(Fx);
@@ -132,15 +124,15 @@ void MassObject::setup_equations()
     for(int f=0;f!=pos_forces.size();f++)
     {
         engine->A(row,pos_forces.at(f)->x.nr)=-engine->delta_t/m*engine->k;
-        engine->B(row)+=pos_forces.at(f)->x.last_t*(1.0-engine->k)/m*engine->delta_t;
+        engine->B(row)+=pos_forces.at(f)->x.prev_t()*(1.0-engine->k)/m*engine->delta_t;
 
     }
     for(int f=0;f!=neg_forces.size();f++)
     {
         engine->A(row,neg_forces.at(f)->x.nr)=engine->delta_t/m*engine->k;
-        engine->B(row)+=-neg_forces.at(f)->x.last_t*(1.0-engine->k)/m*engine->delta_t;
+        engine->B(row)+=-neg_forces.at(f)->x.prev_t()*(1.0-engine->k)/m*engine->delta_t;
     }
-    engine->B(row)+=v.x.last_t;
+    engine->B(row)+=v.x.prev_t();
 
     //   dvy/dt=1/m*sum(Fy);
     row=v.y.nr;
@@ -148,20 +140,20 @@ void MassObject::setup_equations()
     for(int f=0;f!=pos_forces.size();f++)
     {
         engine->A(row,pos_forces.at(f)->y.nr)=-engine->delta_t/m*engine->k;
-        engine->B(row)+=pos_forces.at(f)->y.last_t*(1.0-engine->k)/m*engine->delta_t;
+        engine->B(row)+=pos_forces.at(f)->y.prev_t()*(1.0-engine->k)/m*engine->delta_t;
     }
     for(int f=0;f!=neg_forces.size();f++)
     {
         engine->A(row,neg_forces.at(f)->y.nr)=engine->delta_t/m*engine->k;
-        engine->B(row)+=-neg_forces.at(f)->y.last_t*(1.0-engine->k)/m*engine->delta_t;
+        engine->B(row)+=-neg_forces.at(f)->y.prev_t()*(1.0-engine->k)/m*engine->delta_t;
     }
-   engine->B(row)+=v.y.last_t;
+   engine->B(row)+=v.y.prev_t();
 
     // dth/dt=w;
     row=theta.nr;
     engine->A(row,theta.nr)=1;
     engine->A(row,w.nr)=-engine->delta_t*engine->k;
-    engine->B(row)=theta.last_t+w.last_t*engine->delta_t*(1.0-engine->k);
+    engine->B(row)=theta.prev_t()+w.prev_t()*engine->delta_t*(1.0-engine->k);
 
     // dw/dt=1/i*sum(Torque)
     row=w.nr;
@@ -170,22 +162,22 @@ void MassObject::setup_equations()
     for(int f=0;f!=pos_torque.size();f++)
     {
         engine->A(row,pos_torque.at(f)->nr)=-engine->delta_t/I*engine->k;
-        engine->B(row)+=pos_torque.at(f)->last_t/I*(1.0-engine->k)*engine->delta_t;
+        engine->B(row)+=pos_torque.at(f)->prev_t()/I*(1.0-engine->k)*engine->delta_t;
     }
-    engine->B(row)+=w.last_t;
+    engine->B(row)+=w.prev_t();
 }
 
 void MassObject::update_graphics()
 {
-    shape->item->setPos(p.x.curr,p.y.curr);
-    shape->item->setRotation(theta.curr*180.0/M_PI);
+    shape->item->setPos(p.x.curr(),p.y.curr());
+    shape->item->setRotation(theta.curr()*180.0/M_PI);
 }
 
 void MassObject::calc_energy_diff()
 {
-    Ex.delta=m*(v.x.curr*v.x.curr-v.x.last_t*v.x.last_t)/2.0;
-    Ey.delta=m*(v.y.curr*v.y.curr-v.y.last_t*v.y.last_t)/2.0;
-    Ew.delta=I*(w.curr*w.curr-w.last_t*w.last_t)/2.0;
+    Ex.delta=m*(v.x.curr()*v.x.curr()-v.x.prev_t()*v.x.prev_t())/2.0;
+    Ey.delta=m*(v.y.curr()*v.y.curr()-v.y.prev_t()*v.y.prev_t())/2.0;
+    Ew.delta=I*(w.curr()*w.curr()-w.prev_t()*w.prev_t())/2.0;
 }
 
 void MassObject::post_iteration()
@@ -210,12 +202,11 @@ PhysicsObject::PhysicsObject(PhysicsEngine *engine,const QString & name)
 DownForce::DownForce(MassObject *object, const QString &name)
     : PhysicsObject(object->engine,name),f("f"),E("E"),object(object)
 {
-    register_variables(&f.x,&f.y);
+    register_eq_variables(&f.x,&f.y);
     register_energies(&E);
     object->pos_forces.append(&f);
-    f.x=0;
     g=9.82;
-    f.y=object->m*g;
+    f.y.init=object->m*g;
 }
 
 
@@ -228,18 +219,16 @@ void DownForce::setup_equations()
 
 void DownForce::calc_energy_diff()
 {
-    E.delta=g*object->m*(object->p.y.last_t-object->p.y.curr);
+    E.delta=g*object->m*(object->p.y.prev_t()-object->p.y.curr());
     engine->Em(E.nr,object->Ey.nr)=true;
 }
 
 SpringWallForce::SpringWallForce(Mechanic2DObject *object, const QString &name)
     :PhysicsObject(object->engine,name),f("f"),E("E"),object(object)
 {
-    register_variables(&f.x,&f.y);
+    register_eq_variables(&f.x,&f.y);
     register_energies(&E);
     object->pos_forces.append(&f);
-    f.x=0;
-    f.y=0;
     k=1;
 }
 
@@ -248,7 +237,7 @@ void SpringWallForce::setup_equations()
 {
     engine->A(f.x.nr,f.x.nr)=1;
     engine->A(f.y.nr,f.y.nr)=1;
-    if (object->p.y.curr>10)
+    if (object->p.y.curr()>10)
     {
         engine->A(f.y.nr,object->p.y.nr)=k; //*(object->p.y.val-10);
         engine->B(f.y.nr)=k*10;
@@ -258,12 +247,12 @@ void SpringWallForce::setup_equations()
 
 void SpringWallForce::calc_energy_diff()
 {
-    qreal curr=0,last_t=0;
-    if (object->p.y.curr>10)
-        curr=object->p.y.curr-10;
-    if (object->p.y.last_t>10)
-        last_t=object->p.y.last_t-10;
-    E.delta=k*(curr*curr-last_t*last_t)/2;
+    qreal curr=0,prev_t=0;
+    if (object->p.y.curr()>10)
+        curr=object->p.y.curr()-10;
+    if (object->p.y.prev_t()>10)
+        prev_t=object->p.y.prev_t()-10;
+    E.delta=k*(curr*curr-prev_t*prev_t)/2;
 }
 
 
@@ -272,8 +261,6 @@ F1::F1(Mechanic2DObject *object1, Mechanic2DObject *object2, const QString &name
 {
     register_variables(&f.x,&f.y);
     object1->pos_forces.append(&f);
-    f.x=0;
-    f.y=0;
 }
 
 void F1::setup_equations()
@@ -281,8 +268,8 @@ void F1::setup_equations()
     int row=f.x.nr;
     //(ax-bx)^2+(bx-by)^2=l^2;
 
-    qreal vx=object1->p.x.curr-object2->p.x.curr;
-    qreal vy=object1->p.y.curr-object2->p.y.curr;
+    qreal vx=object1->p.x.curr()-object2->p.x.curr();
+    qreal vy=object1->p.y.curr()-object2->p.y.curr();
     qreal l=sqrt(vx*vx+vy*vy);
     vx/=l;
     vy/=l;
@@ -302,7 +289,7 @@ void F1::calc_energy_diff()
 ConstTorque::ConstTorque(Mechanic2DObject *object, const QString &name, qreal torque)
     : PhysicsObject(object->engine,name),t("t"),object(object),const_torque(torque)
 {
-    register_variables(&t);
+    register_eq_variables(&t);
     object->pos_torque.append(&t);
 }
 

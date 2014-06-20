@@ -8,8 +8,9 @@ class Friction : public PhysicsObject, public Graphics2D
 public:
     Friction(Mechanic2DObject *object1,Mechanic2DObject *object2,const QString & name);
     Vector f;
-    Variable tau1,tau2;
-    State state,angle,angle2,length,index1,index2;
+    RealVariable tau1,tau2;
+    VariableT<int> state,prevstate,index1,index2;
+    RealVariable angle,angle2,length;
     Mechanic2DObject *object1,*object2;
     virtual void setup_equations();
     virtual void calc_energy_diff();

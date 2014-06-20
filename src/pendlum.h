@@ -28,7 +28,7 @@ public:
 private:
     Vector f;
     qreal x,y;
-    Variable t;
+    RealVariable t;
     MassObject *object;
     QGraphicsLineItem *line;
     qreal l,theta;
@@ -52,7 +52,7 @@ class StringPendlum : public PhysicsObject, public Graphics2D
 public:
     StringPendlum(MassObject *object,const QString & name,qreal x=0.0,qreal y=0.0);
 private:
-    State at_edge;
+    VariableT<bool> at_edge;
     Energy loss;
     Vector f;
     qreal l,x,y;
