@@ -21,6 +21,7 @@ class Shape2D
 {
 public:
     virtual ~Shape2D() {};
+    qreal max_center_dist;
     QAbstractGraphicsShapeItem *item;
 };
 

@@ -339,7 +339,7 @@ void MainWindow::on_setup_activated(const QString &arg1)
        // new ConstTorque(box2,"const torque",-8.0);
         ui->graphicsView->scale(5,5);
     }
-    else if (arg1=="collition6")
+    else if (arg1=="collision6")
     {
         QVector<QPointF> p1;
         p1.append(QPointF(-10,-2.0));
@@ -359,6 +359,36 @@ void MainWindow::on_setup_activated(const QString &arg1)
         box2->I=0.5;
         new DownForce(box2,"downforce");
         new Friction(box,box2,"friction 1");
+        new Fix(box,"fix",true);
+       // new ConstTorque(box2,"const torque",-8.0);
+        ui->graphicsView->scale(5,5);
+    }
+    else if (arg1=="collision7")
+    {
+        QVector<QPointF> p1;
+        p1.append(QPointF(-10,-2.0));
+        p1.append(QPointF(10,-2));
+        p1.append(QPointF(10,2));
+        p1.append(QPointF(-10,2));
+        MassObject *box=new MassObject(world,"box 1",new ShapePolygon(p1));
+        box->p.y.init=1.5;
+        box->theta.init=-0.6;
+        box->m=10000;
+        box->I=10000;
+        MassObject *box3=new MassObject(world,"box 3",new ShapePolygon(p1));
+        box3->p.y.init=4.5;
+        box3->theta.init=-0.6+M_PI/2.0;
+        box3->m=10000;
+        box3->I=10000;
+      //  box->w.init=0.1;
+        MassObject *box2=new MassObject(world,"box 2");
+        box2->p.y.init=-5;
+        box2->p.x.init=0;
+        box2->theta.init=-0.25+0*M_PI/1.0;
+        box2->I=0.5;
+        new DownForce(box2,"downforce");
+        new Friction(box,box2,"friction 1");
+        new Friction(box3,box2,"friction 1");
         new Fix(box,"fix",true);
        // new ConstTorque(box2,"const torque",-8.0);
         ui->graphicsView->scale(5,5);
@@ -391,7 +421,7 @@ void MainWindow::on_setup_activated(const QString &arg1)
         srand(0);
 
         MassObject *boxn[50];
-        for (int i=0;i!=5;i++)
+        for (int i=0;i!=10;i++)
         {
             QVector<QPointF> p1;
             p1.append(QPointF(-1.5-0.5*rand()/RAND_MAX,-1.5-0.5*rand()/RAND_MAX));
@@ -409,6 +439,34 @@ void MainWindow::on_setup_activated(const QString &arg1)
                 new Friction(boxn[i],boxn[i2],"");
 
         }
+    }
+    else if(arg1=="collision8")
+    {
+        QVector<QPointF> p1;
+        p1.clear();
+        p1.append(QPointF(-6,-2.0));
+        p1.append(QPointF(6,-2));
+        p1.append(QPointF(6,2));
+        p1.append(QPointF(-6,2));
+        MassObject *box3=new MassObject(world,"fbox 3",new ShapePolygon(p1));
+        box3->p.x.init=0;
+        box3->p.y.init=15;
+        box3->theta.init=0;
+        new Fix(box3,"");
+
+        p1.clear();
+        p1.append(QPointF(-2,-2));
+        p1.append(QPointF(2,-2));
+        p1.append(QPointF(2,2));
+        p1.append(QPointF(-2,2));
+        MassObject *boxn = new MassObject(world,QString("box 0"),new ShapePolygon(p1));
+        boxn->p.x.init=2.0;
+        boxn->p.y.init=-10.0;
+        boxn->theta.init = 0.1;
+        new DownForce(boxn,"downforce");
+        new Friction(boxn,box3,"");
+
+
     }
     else if (arg1=="t1")
     {

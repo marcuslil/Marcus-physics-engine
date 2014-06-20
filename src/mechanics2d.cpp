@@ -39,11 +39,13 @@ ShapePolygon::ShapePolygon(const QVector<QPointF> &points)
     angle.resize(points.size());
     radius.resize(points.size());
     arc_length.resize(points.size());
+    max_center_dist = 0.0;
     for (int p=0;p!=points.size();p++)
     {
         radius[p]=vector_length(points.at(p));
         angle[p]=atan2(points.at(p).y(),points.at(p).x());
         arc_length[p]=vector_length(points.at(p)-points.at((p+1)%points.size()));
+        if (radius[p] > max_center_dist) max_center_dist = radius[p];
     }
     inner_angle.resize(points.size());
     adj_inner_angle.resize(points.size());
@@ -60,12 +62,14 @@ ShapePolygon::ShapePolygon(const QVector<QPointF> &points)
     p2.append(QPointF(0,0));
     p2.append(QPointF(1,0));
     p.addPolygon(p2);
+
     item=new QGraphicsPathItem(p);
 }
 
 ShapeCircle::ShapeCircle(qreal radius)
     : radius(radius)
 {
+    max_center_dist = radius;
     item=new QGraphicsEllipseItem(0,0,radius,radius);
 }
 

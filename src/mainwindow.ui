@@ -53,7 +53,12 @@
         </item>
         <item>
          <property name="text">
-          <string>collition6</string>
+          <string>collision7</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>collision6</string>
          </property>
         </item>
         <item>
@@ -227,7 +232,7 @@
            <x>0</x>
            <y>0</y>
            <width>324</width>
-           <height>238</height>
+           <height>242</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -264,7 +269,7 @@
      <x>0</x>
      <y>0</y>
      <width>846</width>
-     <height>25</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>

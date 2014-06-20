@@ -107,7 +107,7 @@ bool check_coll(Mechanic2DObject *object1,Mechanic2DObject *object2,int & line1,
             static int hitnr=0;
             if (point_cossed_line(line_last_t.p1(),line_last_t.p2(),point_last_t,line_curr.p1(),line_curr.p2(),point_curr,dist))
             {
-                qDebug() << hitnr++<< "hit: point nr " << point << " on " << object2->name << " crossed line nr " << line << "on " << object1->name;
+                //qDebug() << hitnr++<< "hit: point nr " << point << " on " << object2->name << " crossed line nr " << line << "on " << object1->name;
                 line1=line;
                 point1=point;
                 return true;
@@ -164,7 +164,7 @@ bool right_side(Mechanic2DObject *object1,Mechanic2DObject *object2,int line,int
     static int hitnr=0;
     if (rs2(line_curr.p1(),line_curr.p2(),point_curr))
     {
-        qDebug() << hitnr++<< "hit: point nr " << point << " on " << object2->name << " wrong side off " << line << "on " << object1->name;
+        //qDebug() << hitnr++<< "hit: point nr " << point << " on " << object2->name << " wrong side off " << line << "on " << object1->name;
         return true;
     }
 
@@ -303,6 +303,10 @@ void Friction::post_iteration()
     qreal dist;
     if (state.curr()==Free)
     {
+
+
+        if (abs(object1->p.x.curr()-object2->p.x.curr()) > object1->shape->max_center_dist + object2->shape->max_center_dist) return;
+        if (abs(object1->p.y.curr()-object2->p.y.curr()) > object1->shape->max_center_dist + object2->shape->max_center_dist) return;
         bool swap=false;
         if (check_coll(object1,object2,_line,_point,dist) ||  (swap=check_coll(object2,object1,_line,_point,dist)))
         {
@@ -327,7 +331,6 @@ void Friction::post_iteration()
             point_on_line+=dir;
             length.curr()=vector_length(point_on_line);
             angle.curr()=atan2(point_on_line.y(),point_on_line.x());
-            //post_iteration();
         }
     }
 
@@ -345,52 +348,11 @@ void Friction::post_iteration()
         int i2m1=(i2-1+i2max)%i2max;
         int i2p1=(i2+1)%i2max;
 
-        if (state.curr()==Line1_to_Point2_fixed)
+//        if (state.curr()==Line1_to_Point2_fixed && (check_coll(object2,object1,i2m1,i1p1,dist,true) || check_coll(object1,object2,i1,i2m1,dist,true) ))
+//        if (state.curr()==Line1_to_Point2_fixed && (check_coll(object2,object1,i2m1,i1p1,dist,true) || check_coll(object1,object2,i1,i2m1,dist,true) || right_side(object2,object1,i2m1,i1p1) || right_side(object1,object2,i1,i2m1)))
+        if (state.curr()==Line1_to_Point2_fixed && (right_side(object2,object1,i2m1,i1p1) || right_side(object1,object2,i1,i2m1)))
         {
-            const qreal & theta1=p1->angle.at(i1);
-            const qreal alpha2=theta1+M_PI-p1->inner_angle.at(i1);
-
-            const qreal a3=alpha2+object1->theta.curr();
-
-          //  const qreal Fh=f.x.curr()*cos(a3)+f.y.curr()*sin(a3);
-            const qreal Fv=f.x.curr()*cos(a3+M_PI/2.0)+f.y.curr()*sin(a3+M_PI/2.0);
-
-            if (Fv<-0.001)
-            {
-              //  qDebug() << "goto free1";
-                state.curr()=Free;
-                //post_iteration();
-            }
-        }
-
-        if (state.curr()==Point1_to_Line2_fixed)
-        {
-            const qreal & theta1=p2->angle.at(i1);
-            const qreal alpha2=theta1+M_PI-p2->inner_angle.at(i1);
-
-            const qreal a3=alpha2+object2->theta.curr();
-
-            //const qreal Fh=f.x.curr()*cos(a3)+f.y.curr()*sin(a3);
-            const qreal Fv=f.x.curr()*cos(a3+M_PI/2.0)+f.y.curr()*sin(a3+M_PI/2.0);
-
-            if (Fv>0.001)
-            {
-                //qDebug() << "goto free2";
-                state.curr()=Free;
-                //post_iteration();
-            }
-            else if (state.prev()==Line1_to_Line2_fixed)
-            {
-//                && right_side(object1,object2,index1.prev(),index2.prev()))
-
-                qDebug() << "state is Point1_to_Line2_fixed prev state was line1_line2";
-            }
-        }
-
-
-        if (state.curr()==Line1_to_Point2_fixed && (check_coll(object2,object1,i2m1,i1p1,dist,true) || check_coll(object1,object2,i1,i2m1,dist,true) ))
-        {
-           // qDebug() << "second hit 1";
+            //qDebug() << "second hit 1";
 
             const qreal & theta1=p1->angle.at(i1);
             const qreal & theta2=angle.curr();
@@ -413,9 +375,11 @@ void Friction::post_iteration()
             index1.curr()=i1;
             index2.curr()=i2m1;
         }
-        else if (state.curr()==Point1_to_Line2_fixed && (check_coll(object1,object2,i2m1,i1p1,dist,true) || check_coll(object2,object1,i1,i2m1,dist,true) ))
+//        else if (state.curr()==Point1_to_Line2_fixed && (check_coll(object1,object2,i2m1,i1p1,dist,true) || check_coll(object2,object1,i1,i2m1,dist,true) ))
+//        else if (state.curr()==Point1_to_Line2_fixed && (check_coll(object1,object2,i2m1,i1p1,dist,true) || check_coll(object2,object1,i1,i2m1,dist,true) || right_side(object1,object2,i2m1,i1p1) || right_side(object2,object1,i1,i2m1)))
+        else if (state.curr()==Point1_to_Line2_fixed && (right_side(object1,object2,i2m1,i1p1) || right_side(object2,object1,i1,i2m1)))
         {
-           // qDebug() << "second hit 1 222";
+            //qDebug() << "second hit 1 222";
             const qreal & theta1=p2->angle.at(i1);
             const qreal & theta2=angle.curr();
             const qreal & theta3=p1->adj_inner_angle.at(i2m1);
@@ -440,9 +404,11 @@ void Friction::post_iteration()
             index2.curr()=i1;
 
         }
-        else if (state.curr()==Line1_to_Point2_fixed && (check_coll(object1,object2,i1,i2p1,dist,true) || check_coll(object2,object1,i2,i1,dist,true)))
+//        else if (state.curr()==Line1_to_Point2_fixed && (check_coll(object1,object2,i1,i2p1,dist,true) || check_coll(object2,object1,i2,i1,dist,true)))
+//        else if (state.curr()==Line1_to_Point2_fixed && (check_coll(object1,object2,i1,i2p1,dist,true) || check_coll(object2,object1,i2,i1,dist,true) || right_side(object1,object2,i1,i2p1) || right_side(object2,object1,i2,i1)))
+        else if (state.curr()==Line1_to_Point2_fixed && (right_side(object1,object2,i1,i2p1) || right_side(object2,object1,i2,i1)))
         {
-          //  qDebug() << "second hit2";
+            //qDebug() << "second hit2";
 
             const qreal & theta1=p1->angle.at(i1);
             const qreal & theta2=angle.curr();
@@ -465,9 +431,11 @@ void Friction::post_iteration()
             index1.curr()=i1;
             index2.curr()=i2;
         }
-        else if (state.curr()==Point1_to_Line2_fixed && (check_coll(object2,object1,i1,i2p1,dist,true) || check_coll(object1,object2,i2,i1,dist,true)))
+//        else if (state.curr()==Point1_to_Line2_fixed && (check_coll(object2,object1,i1,i2p1,dist,true) || check_coll(object1,object2,i2,i1,dist,true)))
+//        else if (state.curr()==Point1_to_Line2_fixed && (check_coll(object2,object1,i1,i2p1,dist,true) || check_coll(object1,object2,i2,i1,dist,true) || right_side(object2,object1,i1,i2p1) || right_side(object1,object2,i2,i1)))
+        else if (state.curr()==Point1_to_Line2_fixed && (right_side(object2,object1,i1,i2p1) || right_side(object1,object2,i2,i1)))
         {
-          //  qDebug() << "second hit2 222";
+            //qDebug() << "second hit2 222";
 
             const qreal & theta1=p2->angle.at(i1);
             const qreal theta2=angle.curr(); //-angle2.curr();
@@ -500,7 +468,53 @@ void Friction::post_iteration()
  //           angle2.curr()=object2->theta.curr()-object1->theta.curr()+angle.curr();
             index1.curr()=i2;
             index2.curr()=i1;
-            //post_iteration();
+        }
+//        else if (state.curr()==Line1_to_Point2_fixed && (right_side(object2,object1,i2m1,i1p1) || right_side(object1,object2,i1,i2m1) )) qDebug() << "!1";
+//       else if (state.curr()==Point1_to_Line2_fixed && (right_side(object1,object2,i2m1,i1p1) || right_side(object2,object1,i1,i2m1)))  qDebug() << "!2";
+//        else if (state.curr()==Line1_to_Point2_fixed && (right_side(object1,object2,i1,i2p1) || right_side(object2,object1,i2,i1)))  qDebug() << "!3";
+//        else if (state.curr()==Point1_to_Line2_fixed && (right_side(object2,object1,i1,i2p1) || right_side(object1,object2,i2,i1)))  qDebug() << "!4";
+
+
+        if (state.curr()==Line1_to_Point2_fixed)
+        {
+            const qreal & theta1=p1->angle.at(i1);
+            const qreal alpha2=theta1+M_PI-p1->inner_angle.at(i1);
+
+            const qreal a3=alpha2+object1->theta.curr();
+
+          //  const qreal Fh=f.x.curr()*cos(a3)+f.y.curr()*sin(a3);
+            const qreal Fv=f.x.curr()*cos(a3+M_PI/2.0)+f.y.curr()*sin(a3+M_PI/2.0);
+
+            if (Fv<-0.0)
+            {
+                //qDebug() << "goto free1" << Fv;
+                state.curr()=Free;
+                return;
+            }
+        }
+
+        if (state.curr()==Point1_to_Line2_fixed)
+        {
+            const qreal & theta1=p2->angle.at(i1);
+            const qreal alpha2=theta1+M_PI-p2->inner_angle.at(i1);
+
+            const qreal a3=alpha2+object2->theta.curr();
+
+            //const qreal Fh=f.x.curr()*cos(a3)+f.y.curr()*sin(a3);
+            const qreal Fv=f.x.curr()*cos(a3+M_PI/2.0)+f.y.curr()*sin(a3+M_PI/2.0);
+
+            if (Fv>0.0)
+            {
+                //qDebug() << "goto free2  F= " << Fv << "line=" << index1.curr() << "point=" << index2.curr();
+                state.curr()=Free;
+                return;
+            }
+            else if (state.prev()==Line1_to_Line2_fixed)
+            {
+//                && right_side(object1,object2,index1.prev(),index2.prev()))
+
+                //qDebug() << "state is Point1_to_Line2_fixed prev state was line1_line2";
+            }
         }
 
     }
@@ -558,14 +572,14 @@ void Friction::post_iteration()
  //       qDebug() << "Fh" << Fh << "Fv" << Fv;
   //      qDebug() << "F1" << F1 << "F2" << F2;
 
-        const qreal negF=-0.001;
+        const qreal negF=-0.0;
 
         if (F1<negF && F2<negF)
         {
-            qDebug() << "F1<0 && F2<0";
+            //qDebug() << "F1<0 && F2<0";
             //state.curr()=Free;
             //post_iteration();
-            return;
+            //return;
         }
 
         if (a2 && F1<negF)
@@ -580,6 +594,7 @@ void Friction::post_iteration()
             QPointF p=o1p2-o2c;
             length.curr()=vector_length(p);
             angle.curr()=atan2(p.y(),p.x())-angle2.curr();
+            return;
         }
 
         if (!a2 && F1<negF)
@@ -593,7 +608,7 @@ void Friction::post_iteration()
             QPointF p=o2p1;
             length.curr()=vector_length(p);
             angle.curr()=atan2(p.y(),p.x());
-            //angle2.curr()=
+            return;
         }
 
         if (!a1 && F2<negF)
@@ -607,7 +622,6 @@ void Friction::post_iteration()
             QPointF p=o2p2;
             length.curr()=vector_length(p);
             angle.curr()=atan2(p.y(),p.x());
-            //post_iteration();
             return;
         }
 
@@ -622,10 +636,9 @@ void Friction::post_iteration()
              QPointF p=o1p1-o2c;
              length.curr()=vector_length(p);
              angle.curr()=atan2(p.y(),p.x())-angle2.curr();
+             return;
          }
-
     }
-
 }
 
 #include <QTransform>
