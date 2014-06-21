@@ -15,7 +15,7 @@ private:
     QGraphicsLineItem *line;
     virtual void setup_equations();
     virtual void calc_energy_diff();
-    virtual void update_graphics();
+    virtual void update_graphics(int history);
 };
 
 class CompoundPendlum : public PhysicsObject, public Graphics2D
@@ -24,7 +24,7 @@ public:
     CompoundPendlum(MassObject *object,const QString & name, qreal x, qreal y);
     virtual void setup_equations();
     virtual void calc_energy_diff();
-    virtual void update_graphics();
+    virtual void update_graphics(int history);
 private:
     Vector f;
     qreal x,y;
@@ -43,7 +43,7 @@ private:
     qreal x,y,T,m;
     virtual void setup_equations();
     virtual void calc_energy_diff();
-    virtual void update_graphics();
+    virtual void update_graphics(int history);
     QGraphicsRectItem *rect;
 };
 
@@ -60,7 +60,7 @@ private:
     QGraphicsLineItem *line;
     virtual void setup_equations();
     virtual void calc_energy_diff();
-    virtual void update_graphics();
+    virtual void update_graphics(int history);
 };
 
 #endif // PENDLUM_H

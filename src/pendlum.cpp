@@ -13,9 +13,9 @@ SimplePendlum::SimplePendlum(MassObject *object, const QString &name, qreal x, q
     l=sqrt(vx*vx+vy*vy);
 }
 
-void SimplePendlum::update_graphics()
+void SimplePendlum::update_graphics(int history)
 {
-    line->setLine(x,y,object->p.x.curr(),object->p.y.curr());
+    line->setLine(x,y,object->p.x.at(history),object->p.y.at(history));
 }
 
 void SimplePendlum::setup_equations()
@@ -59,7 +59,7 @@ CompoundPendlum::CompoundPendlum(MassObject *object, const QString &name,qreal x
     object->world->scene.addItem(line);
 }
 
-void CompoundPendlum::update_graphics()
+void CompoundPendlum::update_graphics(int history)
 {
     line->setLine(x,y,object->p.x.curr(),object->p.y.curr());
 }
@@ -110,7 +110,7 @@ MathPendlum::MathPendlum(Mechanic2DWorld *world, const QString &name, qreal x, q
     world->scene.addItem(rect);
 }
 
-void MathPendlum::update_graphics()
+void MathPendlum::update_graphics(int history)
 {
     rect->setPos(x+cos(2.0*M_PI*engine->t/T)*m,y);
 }
@@ -140,9 +140,9 @@ StringPendlum::StringPendlum(MassObject *object, const QString &name, qreal x, q
     l=sqrt(vx*vx+vy*vy);
 }
 
-void StringPendlum::update_graphics()
+void StringPendlum::update_graphics(int history)
 {
-    line->setLine(x,y,object->p.x.curr(),object->p.y.curr());
+    line->setLine(x,y,object->p.x.at(history),object->p.y.at(history));
 }
 
 void StringPendlum::setup_equations()

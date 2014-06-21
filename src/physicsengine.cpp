@@ -45,6 +45,7 @@ void PhysicsEngine::init()
     }
     prev=curr;
     prev_t=curr;
+    history.clear();
 
 #ifdef USE_ARMADILLO
     A.resize(eq_variables.size(),eq_variables.size());
@@ -66,10 +67,21 @@ void PhysicsEngine::clear()
         delete objects.last();
     eq_variables.clear();
     variables.clear();
-    eq_variables.clear();
     energies.clear();
     curr.clear();
+    history.clear();
+    history_size = 0;
     init();
+}
+
+void PhysicsEngine::enableHistory(bool enable)
+{
+    if (!enable)
+    {
+        history=curr;
+        history_size = 0;
+    }
+    history_enabled = enable;
 }
 
 void PhysicsEngine::register_variables(PhysicsObject *object, bool eq_variable,Variable *v1, Variable *v2, Variable *v3, Variable *v4, Variable *v5, Variable *v6, Variable *v7, Variable *v8, Variable *v9, Variable *v10)
@@ -102,8 +114,6 @@ void PhysicsEngine::register_energies(PhysicsObject *object,Energy *e1, Energy *
     }
     energy_matix.resize(energies.size()*energies.size());
 }
-
-
 
 bool PhysicsEngine::iteration()
 {
@@ -156,9 +166,7 @@ bool PhysicsEngine::iteration()
         e_check_iteration++;
         delta_t/=2.1;
         return false;
-//        exit(0);
     }
-
 
     for (int v=0;v!=eq_variables.size();v++)
         eq_variables[v]->curr()=A.at(v*size2+size);
@@ -166,6 +174,12 @@ bool PhysicsEngine::iteration()
 
     for(int i=0;i!=objects.size();i++)
         objects[i]->post_iteration();
+
+    if (history_enabled)
+    {
+        history+=curr;
+        history_size++;
+    }
 
     if (sub_iteration<max_subitarations)
     {

@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->graphicsView->scale(5,5);
     running=false;
     enginesettings.engine=&engine;
+    engine.enableHistory();
 
     ui->graphicsView->installEventFilter(this);
 
@@ -40,12 +41,18 @@ void MainWindow::on_start_stop_clicked()
         ui->step->setEnabled(true);
         ui->start_stop->setText("Start");
         timer.stop();
+        ui->slide_history->setMaximum(engine.historySize());
+        ui->spin_history->setMaximum(engine.historySize());
+        ui->slide_history->setEnabled(true);
+        ui->spin_history->setEnabled(true);
     }
     else
     {
         ui->step->setEnabled(false);
         ui->start_stop->setText("Stop");
         timer.start(enginesettings.update_graphics_time);
+        ui->slide_history->setEnabled(false);
+        ui->spin_history->setEnabled(false);
     }
     running=!running;
 }
@@ -86,6 +93,8 @@ void MainWindow::on_step_clicked()
     sim_time=a.elapsed();
     used_cpu_time_simulation+=sim_time;
     update_graphics(sim_time);
+    ui->slide_history->setMaximum(engine.historySize());
+    ui->spin_history->setMaximum(engine.historySize());
 }
 
 void MainWindow::on_variables_clicked()
@@ -553,4 +562,23 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 void MainWindow::closeEvent(QCloseEvent *)
 {
     enginesettings.close();
+}
+
+void MainWindow::on_check_history_clicked(bool checked)
+{
+    engine.enableHistory(checked);
+    ui->slide_history->setMaximum(engine.historySize());
+    ui->spin_history->setMaximum(engine.historySize());
+}
+
+void MainWindow::on_slide_history_sliderMoved(int position)
+{
+    ui->spin_history->setValue(position);
+    world->update_graphics(position);
+}
+
+void MainWindow::on_spin_history_valueChanged(int arg1)
+{
+    ui->slide_history->setValue(arg1);
+    world->update_graphics(arg1);
 }

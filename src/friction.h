@@ -15,11 +15,11 @@ public:
     virtual void setup_equations();
     virtual void calc_energy_diff();
     virtual void post_iteration();
-    virtual void update_graphics();
+    virtual void update_graphics(int history);
     enum {Free=0, Line1_to_Point2_fixed,Point1_to_Line2_fixed,Line1_to_Line2_fixed};
     QGraphicsEllipseItem *item,*item2;
 private:
-    QLineF get_contact_line(bool world_coordinates=false);
+    QLineF get_contact_line(bool world_coordinates, int history);
 
 };
 

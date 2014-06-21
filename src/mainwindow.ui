@@ -150,6 +150,30 @@
        </widget>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="check_history">
+          <property name="text">
+           <string>History</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="slide_history">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spin_history"/>
+        </item>
+       </layout>
+      </item>
+      <item>
        <widget class="QLabel" name="label_3">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -231,8 +255,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>324</width>
-           <height>242</height>
+           <width>407</width>
+           <height>207</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">

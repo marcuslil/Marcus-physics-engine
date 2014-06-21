@@ -14,9 +14,9 @@ LoseConnection::LoseConnection(Mechanic2DObject *object1, Mechanic2DObject *obje
     object1->world->scene.addItem(line);
 }
 
-void LoseConnection::update_graphics()
+void LoseConnection::update_graphics(int history)
 {
-    line->setLine(object1->p.x.curr(),object1->p.y.curr(),object2->p.x.curr(),object2->p.y.curr());
+    line->setLine(object1->p.x.at(history),object1->p.y.at(history),object2->p.x.at(history),object2->p.y.at(history));
 }
 
 
@@ -72,9 +72,9 @@ FixedConnection::FixedConnection(Mechanic2DObject *object1, Mechanic2DObject *ob
     object1->world->scene.addItem(line);
 }
 
-void FixedConnection::update_graphics()
+void FixedConnection::update_graphics(int history)
 {
-    line->setLine(object1->p.x.curr(),object1->p.y.curr(),object2->p.x.curr(),object2->p.y.curr());
+    line->setLine(object1->p.x.at(history),object1->p.y.at(history),object2->p.x.at(history),object2->p.y.at(history));
 }
 
 

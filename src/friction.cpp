@@ -104,7 +104,7 @@ bool check_coll(Mechanic2DObject *object1,Mechanic2DObject *object2,int & line1,
       //      qDebug() << "testing: point nr " << point_2 << "(" << point << ") on " <<object2->name << "if crossed line nr" << line_1 << "(" << line << ") on " << object1->name;
        //     qDebug() << line_start_curr << line_stop_curr << point_curr;
        //     qDebug() << line_start_last_t << line_stop_last_t << point_last_t;
-            static int hitnr=0;
+            //static int hitnr=0;
             if (point_cossed_line(line_last_t.p1(),line_last_t.p2(),point_last_t,line_curr.p1(),line_curr.p2(),point_curr,dist))
             {
                 //qDebug() << hitnr++<< "hit: point nr " << point << " on " << object2->name << " crossed line nr " << line << "on " << object1->name;
@@ -161,7 +161,7 @@ bool right_side(Mechanic2DObject *object1,Mechanic2DObject *object2,int line,int
                          object2->p.y.curr()+r*sin(a+object2->theta.curr()));
 
 
-    static int hitnr=0;
+    //static int hitnr=0;
     if (rs2(line_curr.p1(),line_curr.p2(),point_curr))
     {
         //qDebug() << hitnr++<< "hit: point nr " << point << " on " << object2->name << " wrong side off " << line << "on " << object1->name;
@@ -643,57 +643,57 @@ void Friction::post_iteration()
 
 #include <QTransform>
 
-QLineF Friction::get_contact_line(bool world_coordinates)
+QLineF Friction::get_contact_line(bool world_coordinates, int history)
 {
     const ShapePolygon  & p1=dynamic_cast<const ShapePolygon&> (*object1->shape);
     const ShapePolygon  & p2=dynamic_cast<const ShapePolygon&> (*object2->shape);
-    const int & i1=index1.curr();
-    const int & i2=index2.curr();
+    const int & i1=index1.at(history);
+    const int & i2=index2.at(history);
     int i1p1=(i1+1)%p1.points.size();
     int i2p1=(i2+1)%p2.points.size();
     QLineF l;
 
-    QPointF offset=length.curr()*QPointF(cos(angle.curr()),sin(angle.curr()));
+    QPointF offset=length.at(history)*QPointF(cos(angle.at(history)),sin(angle.at(history)));
     QPointF point1,point2;
 
     point1=p1.radius.at(i1)*QPointF(cos(p1.angle.at(i1)),sin(p1.angle.at(i1)));
-    point2=offset+p2.radius.at(i2p1)*QPointF(cos(angle2.curr()+p2.angle.at(i2p1)),sin(angle2.curr()+p2.angle.at(i2p1)));
+    point2=offset+p2.radius.at(i2p1)*QPointF(cos(angle2.at(history)+p2.angle.at(i2p1)),sin(angle2.at(history)+p2.angle.at(i2p1)));
     if (sin(atan2(point2.y(),point2.x())-p1.angle.at(i1))>0.0) l.setP1(point2); else l.setP1(point1);
 
     point1=p1.radius.at(i1p1)*QPointF(cos(p1.angle.at(i1p1)),sin(p1.angle.at(i1p1)));
-    point2=offset+p2.radius.at(i2)*QPointF(cos(angle2.curr()+p2.angle.at(i2)),sin(angle2.curr()+p2.angle.at(i2)));
+    point2=offset+p2.radius.at(i2)*QPointF(cos(angle2.at(history)+p2.angle.at(i2)),sin(angle2.at(history)+p2.angle.at(i2)));
     if (sin(atan2(point2.y(),point2.x())-p1.angle.at(i1p1))<0.0) l.setP2(point2); else l.setP2(point1);
 
     if (world_coordinates)
     {
         QTransform a;
-        a.translate(object1->p.x.curr(),object1->p.y.curr());
-        a.rotateRadians(object1->theta.curr());
+        a.translate(object1->p.x.at(history),object1->p.y.at(history));
+        a.rotateRadians(object1->theta.at(history));
         l=a.map(l);
     }
     return l;
 
 }
 
-void Friction::update_graphics()
+void Friction::update_graphics(int history)
 {
-    if (state.curr()==Line1_to_Point2_fixed || state.curr()==Point1_to_Line2_fixed)
+    if (state.at(history)==Line1_to_Point2_fixed || state.at(history)==Point1_to_Line2_fixed)
     {
         item->setVisible(true);
         item2->setVisible(false);
         Mechanic2DObject *o1;
-        if (state.curr()==Line1_to_Point2_fixed)
+        if (state.at(history)==Line1_to_Point2_fixed)
             o1=object1;
         else
             o1=object2;
 
-        item->setPos(o1->p.x.curr()+length.curr()*cos(angle.curr()+o1->theta.curr()),o1->p.y.curr()+length.curr()*sin(angle.curr()+o1->theta.curr()));
+        item->setPos(o1->p.x.at(history)+length.at(history)*cos(angle.at(history)+o1->theta.at(history)),o1->p.y.at(history)+length.at(history)*sin(angle.at(history)+o1->theta.at(history)));
     }
-    else if (state.curr()==Line1_to_Line2_fixed)
+    else if (state.at(history)==Line1_to_Line2_fixed)
     {
         item->setVisible(true);
         item2->setVisible(true);
-        QLineF l=get_contact_line(true);
+        QLineF l=get_contact_line(true, history);
         item->setPos(l.p1());
         item2->setPos(l.p2());
 

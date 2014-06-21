@@ -15,10 +15,10 @@ Mechanic2DWorld::Mechanic2DWorld(PhysicsEngine *engine, const QString & /*name*/
     this->engine=engine;
 }
 
-void Mechanic2DWorld::update_graphics()
+void Mechanic2DWorld::update_graphics(int history)
 {
     for (int g=0;g!=graphics.size();g++)
-        graphics[g]->update_graphics();
+        graphics[g]->update_graphics(history);
 }
 
 Graphics2D::Graphics2D(Mechanic2DWorld *world)
@@ -171,10 +171,10 @@ void MassObject::setup_equations()
     engine->B(row)+=w.prev_t();
 }
 
-void MassObject::update_graphics()
+void MassObject::update_graphics(int history)
 {
-    shape->item->setPos(p.x.curr(),p.y.curr());
-    shape->item->setRotation(theta.curr()*180.0/M_PI);
+    shape->item->setPos(p.x.at(history),p.y.at(history));
+    shape->item->setRotation(theta.at(history)*180.0/M_PI);
 }
 
 void MassObject::calc_energy_diff()

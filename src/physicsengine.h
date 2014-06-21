@@ -46,6 +46,8 @@ public:
     bool iteration();
     void init();
     void clear();
+    void enableHistory(bool enable=true);
+    inline int historySize() {return history_size;};
     qreal acc_energy_error;
     qreal energy_error_check;
 //private:
@@ -53,9 +55,11 @@ public:
     QList<RealVariable*> eq_variables;
     QList<Energy*> energies;
     QList<Variable*> variables;
-    QVector<char> curr,prev,prev2,prev_t;
+    QVector<char> curr,prev,prev_t,history;
     friend class PhysicsObject;
     friend class Variable;
+    bool history_enabled;
+    int history_size;
     void register_variables(PhysicsObject* object, bool eq_variable,Variable* v1,Variable* v2=0,Variable* v3=0,Variable* v4=0,Variable* v5=0,Variable* v6=0,Variable* v7=0,Variable* v8=0,Variable* v9=0,Variable* v10=0);
     void register_energies(PhysicsObject* object, Energy* e1,Energy* e2=0,Energy* e3=0,Energy* e4=0,Energy* e5=0,Energy* e6=0,Energy* e7=0,Energy* e8=0,Energy* e9=0,Energy* e10=0);
 };
@@ -108,6 +112,11 @@ public:
     inline virtual void initialize()
     {
         curr()=init;
+    }
+    inline T & at(int history)
+    {
+        if (history<0 || history>=engine->history_size) return curr();
+        else return *reinterpret_cast<T*>(engine->history.data()  +pos + history*engine->size);
     }
     inline T & curr()   {return *reinterpret_cast<T*>(engine->curr.data()  +pos);}
     inline T & prev()   {return *reinterpret_cast<T*>(engine->prev.data()  +pos);}

@@ -57,7 +57,7 @@ class Graphics2D
 {
 public:
     Graphics2D(Mechanic2DWorld *world);
-    virtual void update_graphics()=0;
+    virtual void update_graphics(int history)=0;
 };
 
 class Mechanic2DWorld // : public PhysicsObject
@@ -69,7 +69,7 @@ public:
     QList<Graphics2D*> graphics;
     PhysicsEngine *engine;
 
-    virtual void update_graphics();
+    virtual void update_graphics(int history=-1);
 };
 
 class MassObject : public Mechanic2DObject , public Graphics2D
@@ -82,7 +82,7 @@ public:
     qreal m,I;
 
     void calc_energy_diff();
-    virtual void update_graphics();
+    virtual void update_graphics(int history);
     virtual void setup_equations();
     virtual void post_iteration();
 };

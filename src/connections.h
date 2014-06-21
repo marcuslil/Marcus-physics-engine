@@ -13,7 +13,7 @@ public:
     QGraphicsLineItem *line;
     virtual void setup_equations();
     virtual void calc_energy_diff();
-    virtual void update_graphics();
+    virtual void update_graphics(int history);
 };
 
 class FixedConnection : public PhysicsObject, public Graphics2D
@@ -27,7 +27,7 @@ public:
     QGraphicsLineItem *line;
     virtual void setup_equations();
     virtual void calc_energy_diff();
-    virtual void update_graphics();
+    virtual void update_graphics(int history);
 private:
     bool fix_both;
 };
