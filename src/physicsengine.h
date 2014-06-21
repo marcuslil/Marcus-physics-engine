@@ -116,7 +116,7 @@ public:
     inline T & at(int history)
     {
         if (history<0 || history>=engine->history_size) return curr();
-        else return *reinterpret_cast<T*>(engine->history.data()  +pos + history*engine->size);
+        else return *reinterpret_cast<T*>(engine->history.data()  +pos + history*engine->curr.size());
     }
     inline T & curr()   {return *reinterpret_cast<T*>(engine->curr.data()  +pos);}
     inline T & prev()   {return *reinterpret_cast<T*>(engine->prev.data()  +pos);}
