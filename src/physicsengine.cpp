@@ -29,6 +29,9 @@ void PhysicsEngine::init()
 {
     t=0;
     acc_energy_error=0.0;
+    sub_iteration = 0;
+    e_check_iteration = 0;
+
     for (int v=0;v!=eq_variables.size();v++)
     {
         eq_variables[v]->nr=v;
@@ -71,6 +74,8 @@ void PhysicsEngine::clear()
     curr.clear();
     history.clear();
     history_size = 0;
+    sub_iteration = 0;
+    e_check_iteration = 0;
     init();
 }
 
