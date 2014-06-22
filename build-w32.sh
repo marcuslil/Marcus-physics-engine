@@ -12,7 +12,7 @@ cd $BUILD_DIR
 
 
 cat >build.BAT << EOF
-call C:\Qt\4.8.5\bin\qtvars
+call C:\Qt\4.8.6\bin\qtvars
 qmake ..\src\physicsengine_for_win.pro
 call make release
 REM release\fysik1

@@ -434,7 +434,7 @@ void MainWindow::on_setup_activated(const QString &arg1)
         {
             QVector<QPointF> p1;
             p1.append(QPointF(-1.5-0.5*rand()/RAND_MAX,-1.5-0.5*rand()/RAND_MAX));
-            p1.append(QPointF(2,-1.5-+-5*rand()/RAND_MAX));
+            p1.append(QPointF(2,-1.5)); rand(); //-+-5*rand()/RAND_MAX));
             p1.append(QPointF(2,2));
             p1.append(QPointF(-1.5-0.5*rand()/RAND_MAX,2));
             boxn[i]=new MassObject(world,QString("box %1").arg(i),new ShapePolygon(p1));
