@@ -172,6 +172,22 @@ bool right_side(Mechanic2DObject *object1,Mechanic2DObject *object2,int line,int
 
 }
 
+
+bool inside(Mechanic2DObject *object1,Mechanic2DObject *object2,int &p)
+{
+    ShapePolygon *p1=dynamic_cast<ShapePolygon*> (object1->shape);
+    ShapePolygon *p2=dynamic_cast<ShapePolygon*> (object2->shape);
+    for (p=0;p!=p1->points.size();p++)
+    {
+        bool all_inside=true;
+        for(int l=0;l!=p2->points.size() && all_inside;l++)
+            all_inside &= right_side(object2,object1,l,p);
+        if (all_inside) return true;
+    }
+    return false;
+}
+
+
 void Friction::setup_equations()
 {
     int row;
@@ -301,14 +317,22 @@ void Friction::post_iteration()
 {
     int _line,_point;
     qreal dist;
+    int prev_state=prevstate.curr();
+    prevstate.curr()=state.curr();
     if (state.curr()==Free)
     {
-
-
         if (abs(object1->p.x.curr()-object2->p.x.curr()) > object1->shape->max_center_dist + object2->shape->max_center_dist) return;
         if (abs(object1->p.y.curr()-object2->p.y.curr()) > object1->shape->max_center_dist + object2->shape->max_center_dist) return;
         bool swap=false;
-        if (check_coll(object1,object2,_line,_point,dist) ||  (swap=check_coll(object2,object1,_line,_point,dist)))
+        if (prev_state==Line1_to_Point2_fixed && right_side(object1,object2,  index1.curr(),index2.curr()))
+        {
+            state.curr()=Line1_to_Point2_fixed;
+        }
+        else if (prev_state==Point1_to_Line2_fixed && right_side(object2,object1,  index1.curr(),index2.curr()))
+        {
+            state.curr()=Point1_to_Line2_fixed;
+        }
+        else if (check_coll(object1,object2,_line,_point,dist) ||  (swap=check_coll(object2,object1,_line,_point,dist)))
         {
             ShapePolygon *p1;
             if (!swap)

@@ -53,6 +53,11 @@
         </item>
         <item>
          <property name="text">
+          <string>fall through bug</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>collision7</string>
          </property>
         </item>

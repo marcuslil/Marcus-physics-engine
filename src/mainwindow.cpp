@@ -471,6 +471,40 @@ void MainWindow::on_setup_activated(const QString &arg1)
 
         }
     }
+    else if(arg1=="fall through bug")
+    {
+        QVector<QPointF> p1;
+        p1.append(QPointF(-6,-2.0));
+        p1.append(QPointF(6,-2));
+        p1.append(QPointF(6,2));
+        p1.append(QPointF(-6,2));
+        MassObject *box3=new MassObject(world,"fbox 3",new ShapePolygon(p1));
+        box3->p.x.init=0;
+        box3->p.y.init=15;
+        box3->theta.init=0;
+        new Fix(box3,"");
+        srand(0);
+        float_rand(true);
+
+        MassObject *boxn[50];
+        for (int i=0;i!=3;i++)
+        {
+            QVector<QPointF> p1;
+            p1.append(QPointF(-1.5-0.5*float_rand(),-1.5-0.5*float_rand()));
+            p1.append(QPointF(2,-1.5)); float_rand(); //-+-5*rand()/RAND_MAX));
+            p1.append(QPointF(2,2));
+            p1.append(QPointF(-1.5-0.5*float_rand(),2));
+            boxn[i]=new MassObject(world,QString("box %1").arg(i),new ShapePolygon(p1));
+            boxn[i]->p.x.init=2.0*float_rand();
+            boxn[i]->p.y.init=-i*10.0-10.0;
+            new DownForce(boxn[i],"downforce");
+            new Friction(boxn[i],box3,"f3");
+            for (int i2=0;i2<i;i2++)
+                new Friction(boxn[i],boxn[i2],QString("friction %1 to %2").arg(i).arg(i2));
+
+        }
+        engine.set_delta_t=0.005;
+    }
     else if(arg1=="collision8")
     {
         QVector<QPointF> p1;
