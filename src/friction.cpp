@@ -327,10 +327,12 @@ void Friction::post_iteration()
         if (prev_state==Line1_to_Point2_fixed && right_side(object1,object2,  index1.curr(),index2.curr()))
         {
             state.curr()=Line1_to_Point2_fixed;
+            return;
         }
         else if (prev_state==Point1_to_Line2_fixed && right_side(object2,object1,  index1.curr(),index2.curr()))
         {
             state.curr()=Point1_to_Line2_fixed;
+            return;
         }
         else if (check_coll(object1,object2,_line,_point,dist) ||  (swap=check_coll(object2,object1,_line,_point,dist)))
         {
@@ -355,6 +357,7 @@ void Friction::post_iteration()
             point_on_line+=dir;
             length.curr()=vector_length(point_on_line);
             angle.curr()=atan2(point_on_line.y(),point_on_line.x());
+            return;
         }
     }
 
