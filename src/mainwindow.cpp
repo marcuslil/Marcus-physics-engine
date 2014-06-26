@@ -202,7 +202,7 @@ void MainWindow::on_setup_activated(const QString &arg1)
         new Friction(ground2, wheel2, "Friction ground 2wheel2");
         new Friction(ground2, car, "Friction ground2 car");
 
-        //engine.set_delta_t = 0.005;
+        engine.set_delta_t = 0.005;
     }
     else if (arg1=="build 2 demo")
     {
