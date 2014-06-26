@@ -147,6 +147,8 @@ bool right_side(Mechanic2DObject *object1,Mechanic2DObject *object2,int line,int
 
 
     int l_next=line==p1->points.size()-1?0:line+1;
+    Q_ASSERT(line>-1 && line<p1->points.size());
+    Q_ASSERT(point>-1 && point<p2->points.size());
     const qreal & r1=p1->radius.at(line),& r2=p1->radius.at(l_next);
     const qreal & a1=p1->angle.at(line), & a2=p1->angle.at(l_next);
 
@@ -366,10 +368,12 @@ void Friction::post_iteration()
         ShapePolygon *p1=dynamic_cast<ShapePolygon*> (object1->shape);
         ShapePolygon *p2=dynamic_cast<ShapePolygon*> (object2->shape);
 
-        int i1=index1.curr();
-        int i2=index2.curr();
-        int i1max=state.curr()==Line1_to_Line2_fixed?p1->points.size():p2->points.size();
-        int i2max=state.curr()==Line1_to_Line2_fixed?p2->points.size():p1->points.size();
+        int i1=index1.curr(); // line
+        int i2=index2.curr(); // point
+        int i1max=state.curr()==Line1_to_Point2_fixed?p1->points.size():p2->points.size();
+        int i2max=state.curr()==Line1_to_Point2_fixed?p2->points.size():p1->points.size();
+        Q_ASSERT(i1<i1max);
+        Q_ASSERT(i2<i2max);
         int i1p1=(i1+1)%i1max;
 //        int i1m1=(i1-1+i1max)%i1max;
         int i2m1=(i2-1+i2max)%i2max;
