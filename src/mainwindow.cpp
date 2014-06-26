@@ -143,7 +143,68 @@ void MainWindow::on_setup_activated(const QString &arg1)
     ui->graphicsView->setTransform(QTransform());
     ui->graphicsView->scale(5,5);
     engine.set_delta_t=0.01;
-    if (arg1=="build 2 demo")
+    if (arg1=="car 1")
+    {
+        QVector<QPointF> p;
+        p.append(QPointF(-20.0, -0.1));
+        p.append(QPointF( 20.0, -0.1));
+        p.append(QPointF( 20.0, 0.1));
+        p.append(QPointF(-20.0, 0.1));
+        MassObject *ground = new MassObject(world,"ground",new ShapePolygon(p));
+        ground->shape->item->setBrush(Qt::darkBlue);
+        new DownForce(ground,"");
+        MassObject *ground2 = new MassObject(world,"ground",new ShapePolygon(p));
+        ground2->p.x.init=20.0;
+        ground2->p.y.init=6.0;
+        ground->shape->item->setBrush(Qt::lightGray);
+        new Fix(ground2,"");
+        new Friction(ground,ground2, "");
+        MassObject *ped1 = new MassObject(world,"ped 1");
+        ped1->p.x.init = -10.0;
+        ped1->p.y.init = 1.2;
+        new Fix(ped1, "", false);
+        MassObject *ped2 = new MassObject(world,"ped 2");
+        ped2->p.x.init = 10.0;
+        ped2->p.y.init = 1.8;
+        new Fix(ped2, "", false);
+        new Friction(ground, ped1, "");
+        new Friction(ground, ped2, "");
+        p.clear();
+        for (float r=-M_PI+0.1;r<M_PI*0.9+0.1;r+=2.0*M_PI/16.0)
+            p.append((0.5*QPointF(cos(r),sin(r))));
+        MassObject *wheel1 = new MassObject(world,"wheel1",new ShapePolygon(p));
+        wheel1->p.y.init = -3.2;
+        wheel1->shape->item->setBrush(Qt::black);
+        MassObject *wheel2 = new MassObject(world,"wheel2",new ShapePolygon(p));
+        wheel2->p.y.init = -3.2;
+        wheel2->p.x.init = -4.0;
+        wheel2->theta.init = 0.5;
+        wheel2->shape->item->setBrush(Qt::green);
+        p.clear();
+        p.append(QPointF(-3.0, -0.5));
+        p.append(QPointF( 3.0, -0.5));
+        p.append(QPointF( 3.0, 0.5));
+        p.append(QPointF(-3.0, 0.5));
+        MassObject *car = new MassObject(world,"car",new ShapePolygon(p));
+        car->p.x.init= -2.0;
+        car->p.y.init= -4.5;
+        car->shape->item->setBrush(Qt::blue);
+//        new LoseConnection(wheel1, wheel2,"a");
+        new FixedConnection(car,wheel1,"", false);
+        new FixedConnection(car,wheel2,"", false);
+        new DownForce(wheel1,"Downforce wheel1");
+        new DownForce(wheel2,"Downforce wheel1");
+        new DownForce(car,"Downforce car");
+        new Friction(ground, wheel1, "Friction ground wheel1");
+        new Friction(ground, wheel2, "Friction ground wheel2");
+        new Friction(ground, car, "Friction ground car");
+        new Friction(ground2, wheel1, "Friction ground2 wheel1");
+        new Friction(ground2, wheel2, "Friction ground 2wheel2");
+        new Friction(ground2, car, "Friction ground2 car");
+
+        //engine.set_delta_t = 0.005;
+    }
+    else if (arg1=="build 2 demo")
     {
         qreal ph=1;
         qreal l=10,g=9.82;

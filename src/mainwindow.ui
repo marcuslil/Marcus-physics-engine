@@ -48,6 +48,11 @@
         </property>
         <item>
          <property name="text">
+          <string>car 1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>tower</string>
          </property>
         </item>
