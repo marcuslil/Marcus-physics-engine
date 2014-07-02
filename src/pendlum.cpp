@@ -62,7 +62,7 @@ CompoundPendlum::CompoundPendlum(MassObject *object, const QString &name,qreal x
 
 void CompoundPendlum::update_graphics(int history)
 {
-    line->setLine(x,y,object->p.x.curr(),object->p.y.curr());
+    line->setLine(x,y,object->p.x.at(history),object->p.y.at(history));
 }
 
 void CompoundPendlum::setup_equations()
@@ -113,7 +113,10 @@ MathPendlum::MathPendlum(Mechanic2DWorld *world, const QString &name, qreal x, q
 
 void MathPendlum::update_graphics(int history)
 {
-    rect->setPos(x+cos(2.0*M_PI*engine->t/T)*m,y);
+    qreal t;
+    if (history>=0) t = engine->t_hist.at(history);
+    else t = engine->t;
+    rect->setPos(x+cos(2.0*M_PI*t/T)*m,y);
 }
 
 void MathPendlum::calc_energy_diff()
