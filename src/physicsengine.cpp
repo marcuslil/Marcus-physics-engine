@@ -1,6 +1,7 @@
 #include "physicsengine.h"
 
 #include <QDebug>
+#include <math.h>
 
 #ifdef USE_LAPACKE
 #include <lapacke.h>
@@ -153,49 +154,39 @@ bool PhysicsEngine::iteration()
         objects[i]->setup_equations();
 
 #if defined USE_ARMADILLO
+    bool solveok = true;
     arma::vec X;
     try
     {
         X=arma::solve(A,B);
     }
-    catch(std::runtime_error e)
+    catch(std::runtime_error /*e*/)
     {
-        e_check_iteration++;
-        delta_t/=2.1;
-        return false;
+        solveok = false;
     }
-
-
-
-    for (int v=0;v!=eq_variables.size();v++)
-        eq_variables[v]->curr()=X(v);
+    if (solveok)
+        for (int v=0;v!=eq_variables.size();v++)
+            eq_variables[v]->curr()=X(v);
 #elif defined USE_LAPACKE
     int nrhs = 1, info = 0;
     LAPACK_dgesv(&size, &nrhs, _A.data(), &size, ipiv.data(), _B.data(), &size, &info);
     //    int info = LAPACKE_dgesv( LAPACK_COL_MAJOR, size, 1, _A.data(), size, ipiv.data(), _B.data(), size );
-    if (info != 0)
-    {
-        e_check_iteration++;
-        delta_t/=2.1;
-        return false;
-    }
-    memcpy(curr.data(), _B.data(), sizeof(qreal)*size);
+    bool solveok = (info == 0);
+    if (solveok)
+        memcpy(curr.data(), _B.data(), sizeof(qreal)*size);
 #else
-
     QVector<qreal> A=matrix;
-
-
-    if (!solve(A,size))
+    bool solveok = solve(A,size);
+    if (solveok)
+        for (int v=0;v!=eq_variables.size();v++)
+            eq_variables[v]->curr()=A.at(v*size2+size);
+#endif
+    if (!solveok)
     {
-        qDebug() << "No solution" << e_check_iteration << delta_t;
         e_check_iteration++;
         delta_t/=2.1;
         return false;
     }
-
-    for (int v=0;v!=eq_variables.size();v++)
-        eq_variables[v]->curr()=A.at(v*size2+size);
-#endif
 
     for(int i=0;i!=objects.size();i++)
         objects[i]->post_iteration();

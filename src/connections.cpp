@@ -1,4 +1,5 @@
 #include "connections.h"
+#include <math.h>
 
 LoseConnection::LoseConnection(Mechanic2DObject *object1, Mechanic2DObject *object2, const QString &name)
     : PhysicsObject(object1->engine,name),Graphics2D(object1->world),f("f"),object1(object1),object2(object2)

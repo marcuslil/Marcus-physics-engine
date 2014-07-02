@@ -2,6 +2,7 @@
 
 #include <QGraphicsPathItem>
 #include <QDebug>
+#include <math.h>
 
 qreal vector_length(const QPointF & vector)
 {

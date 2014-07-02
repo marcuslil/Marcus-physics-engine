@@ -1,5 +1,6 @@
 #include "pendlum.h"
 #include <QDebug>
+#include <math.h>
 
 SimplePendlum::SimplePendlum(MassObject *object, const QString &name, qreal x, qreal y)
     : PhysicsObject(object->engine,name),Graphics2D(object->world),f("f"),x(x),y(y),object(object)

@@ -1,6 +1,7 @@
 #include "friction.h"
 #include <QTransform>
 #include <QDebug>
+#include <math.h>
 
 Friction::Friction(Mechanic2DObject *object1, Mechanic2DObject *object2, const QString &name)
     : PhysicsObject(object1->engine,name),Graphics2D(object1->world),f("f"),tau1("tau1"),tau2("tau2"),state("state"),prevstate("prevstate"),index1("index1"),index2("index2"),angle("angle"),angle2("angle2"),length("length"),object1(object1),object2(object2)

@@ -4,8 +4,6 @@
 #include <QList>
 #include <QString>
 #include <QVector>
-#include <QVariant>
-#include "math.h"
 
 //#define USE_ARMADILLO
 #define USE_LAPACKE
@@ -53,7 +51,7 @@ public:
     void init();
     void clear();
     void enableHistory(bool enable=true);
-    inline int historySize() {return history_size;};
+    inline int historySize() {return history_size;}
     qreal acc_energy_error;
     qreal energy_error_check;
 //private:
