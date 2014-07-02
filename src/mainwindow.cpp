@@ -41,8 +41,8 @@ void MainWindow::on_start_stop_clicked()
         ui->step->setEnabled(true);
         ui->start_stop->setText("Start");
         timer.stop();
-        ui->slide_history->setMaximum(engine.historySize());
-        ui->spin_history->setMaximum(engine.historySize());
+        ui->slide_history->setMaximum(engine.historySize()-1);
+        ui->spin_history->setMaximum(engine.historySize()-1);
         ui->slide_history->setEnabled(true);
         ui->spin_history->setEnabled(true);
     }
@@ -93,8 +93,8 @@ void MainWindow::on_step_clicked()
     sim_time=a.elapsed();
     used_cpu_time_simulation+=sim_time;
     update_graphics(sim_time);
-    ui->slide_history->setMaximum(engine.historySize());
-    ui->spin_history->setMaximum(engine.historySize());
+    ui->slide_history->setMaximum(engine.historySize()-1);
+    ui->spin_history->setMaximum(engine.historySize()-1);
 }
 
 void MainWindow::on_variables_clicked()
@@ -627,6 +627,8 @@ void MainWindow::on_setup_activated(const QString &arg1)
     engine.init();
     enginesettings.data_to_gui();
     update_graphics();
+    ui->slide_history->setMaximum(engine.historySize()-1);
+    ui->spin_history->setMaximum(engine.historySize()-1);
 }
 
 void MainWindow::on_sim_settings_clicked()
@@ -684,18 +686,30 @@ void MainWindow::closeEvent(QCloseEvent *)
 void MainWindow::on_check_history_clicked(bool checked)
 {
     engine.enableHistory(checked);
-    ui->slide_history->setMaximum(engine.historySize());
-    ui->spin_history->setMaximum(engine.historySize());
+    ui->slide_history->setMaximum(engine.historySize()-1);
+    ui->spin_history->setMaximum(engine.historySize()-1);
 }
 
 void MainWindow::on_slide_history_sliderMoved(int position)
 {
     ui->spin_history->setValue(position);
     world->update_graphics(position);
+    ui->times->setText(QString("%1s").arg(engine.t_hist.at(position)));
+    ui->lost->setText(QString("%1").arg(engine.acc_energy_error_hist.at(position)));
 }
 
 void MainWindow::on_spin_history_valueChanged(int arg1)
 {
     ui->slide_history->setValue(arg1);
     world->update_graphics(arg1);
+    ui->times->setText(QString("%1s").arg(engine.t_hist.at(arg1)));
+    ui->lost->setText(QString("%1").arg(engine.acc_energy_error_hist.at(arg1)));
+}
+
+void MainWindow::on_reset_clicked()
+{
+    engine.resetHistory(ui->slide_history->value());
+    ui->slide_history->setMaximum(engine.historySize()-1);
+    ui->spin_history->setMaximum(engine.historySize()-1);
+    update_graphics();
 }

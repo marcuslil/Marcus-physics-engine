@@ -38,6 +38,8 @@ private slots:
     void on_slide_history_sliderMoved(int position);
     void on_spin_history_valueChanged(int arg1);
 
+    void on_reset_clicked();
+
 private:
     Ui::MainWindow *ui;
     qint64 used_cpu_time_simulation,used_cpu_time_drawing;

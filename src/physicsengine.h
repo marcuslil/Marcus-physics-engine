@@ -52,7 +52,9 @@ public:
     void clear();
     void enableHistory(bool enable=true);
     inline int historySize() {return history_size;}
+    void resetHistory(int position);
     qreal acc_energy_error;
+    QVector<qreal> acc_energy_error_hist;
     qreal energy_error_check;
 //private:
     QList<PhysicsObject*> objects;
@@ -60,6 +62,7 @@ public:
     QList<Energy*> energies;
     QList<Variable*> variables;
     QVector<char> curr,prev,prev_t,history;
+    QVector<qreal> t_hist;
     friend class PhysicsObject;
     friend class Variable;
     bool history_enabled;

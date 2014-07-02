@@ -53,7 +53,12 @@ void PhysicsEngine::init()
     }
     prev=curr;
     prev_t=curr;
-    history.clear();
+    history=curr;
+    t_hist.clear();
+    t_hist.append(t);
+    acc_energy_error_hist.clear();
+    acc_energy_error_hist.append(acc_energy_error);
+    history_size = 1;
 
 #if defined USE_ARMADILLO
     A.resize(eq_variables.size(),eq_variables.size());
@@ -85,6 +90,8 @@ void PhysicsEngine::clear()
     energies.clear();
     curr.clear();
     history.clear();
+    t_hist.clear();
+    acc_energy_error_hist.clear();
     history_size = 0;
     sub_iteration = 0;
     e_check_iteration = 0;
@@ -97,8 +104,28 @@ void PhysicsEngine::enableHistory(bool enable)
     {
         history=curr;
         history_size = 0;
+        t_hist.clear();
+        t_hist.append(t);
+        acc_energy_error_hist.clear();
+        acc_energy_error_hist.append(acc_energy_error);
     }
     history_enabled = enable;
+}
+
+void PhysicsEngine::resetHistory(int position)
+{
+    Q_ASSERT(position < history_size);
+    history.resize((position+1)*curr.size());
+    history_size = position+1;
+    memcpy(curr.data(),history.data()+position*curr.size(), curr.size());
+    prev = curr;
+    prev_t = curr;
+    t_hist.resize(position+1);
+    t=t_hist.at(position);
+    acc_energy_error_hist.resize(position+1);
+    acc_energy_error = acc_energy_error_hist.at(position);
+    sub_iteration = 0;
+    e_check_iteration = 0;
 }
 
 void PhysicsEngine::register_variables(PhysicsObject *object, bool eq_variable,Variable *v1, Variable *v2, Variable *v3, Variable *v4, Variable *v5, Variable *v6, Variable *v7, Variable *v8, Variable *v9, Variable *v10)
@@ -191,12 +218,6 @@ bool PhysicsEngine::iteration()
     for(int i=0;i!=objects.size();i++)
         objects[i]->post_iteration();
 
-    if (history_enabled)
-    {
-        history+=curr;
-        history_size++;
-    }
-
     if (sub_iteration<max_subitarations)
     {
         sub_iteration++;
@@ -247,6 +268,15 @@ bool PhysicsEngine::iteration()
         k=set_k;
 
     t=t+delta_t;
+
+    if (history_enabled)
+    {
+        history+=curr;
+        history_size++;
+        t_hist += t;
+        acc_energy_error_hist += acc_energy_error;
+    }
+
     return true;
 }
 

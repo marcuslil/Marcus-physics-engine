@@ -181,6 +181,13 @@
         <item>
          <widget class="QSpinBox" name="spin_history"/>
         </item>
+        <item>
+         <widget class="QPushButton" name="reset">
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
