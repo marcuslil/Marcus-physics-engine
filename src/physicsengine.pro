@@ -34,3 +34,4 @@ FORMS    += mainwindow.ui \
     pendlumdialog.ui
 
 LIBS += -larmadillo
+LIBS += -llapack

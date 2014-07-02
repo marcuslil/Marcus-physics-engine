@@ -7,7 +7,8 @@
 #include <QVariant>
 #include "math.h"
 
-//#define  USE_ARMADILLO
+//#define USE_ARMADILLO
+#define USE_LAPACKE
 
 #ifdef USE_ARMADILLO
 #include <armadillo>
@@ -29,10 +30,15 @@ public:
     bool k_energy_conserv;
     int sub_iteration,max_subitarations,e_check_iteration,max_e_check_iterations;
 
-#ifdef USE_ARMADILLO
-//QVector<qreal> matrix;
+#if defined USE_ARMADILLO
     arma::mat A;
     arma::vec B;
+#elif defined USE_LAPACKE
+    QVector<qreal> _A,_B;
+    QVector<int> ipiv;
+    int size;
+    inline qreal & A(int y,int x) {return _A[x*size+y];}
+    inline qreal & B(int y) {return _B[y];}
 #else
     QVector<qreal> matrix;
     int size,size2;

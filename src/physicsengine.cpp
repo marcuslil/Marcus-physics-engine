@@ -2,6 +2,10 @@
 
 #include <QDebug>
 
+#ifdef USE_LAPACKE
+#include <lapacke.h>
+#endif
+
 PhysicsEngine::PhysicsEngine()
 {
     set_delta_t=0.1;
@@ -50,11 +54,18 @@ void PhysicsEngine::init()
     prev_t=curr;
     history.clear();
 
-#ifdef USE_ARMADILLO
+#if defined USE_ARMADILLO
     A.resize(eq_variables.size(),eq_variables.size());
     A.fill(0);
     B.resize(eq_variables.size());
     B.fill(0);
+#elif defined USE_LAPACKE
+    size = eq_variables.size();
+    _A.resize(size*size);
+    _A.fill(0);
+    _B.resize(size);
+    _B.fill(0);
+    ipiv.resize(size + 2);
 #else
     size=eq_variables.size();
     size2=eq_variables.size()+1;
@@ -129,17 +140,19 @@ bool PhysicsEngine::iteration()
  //   for(int i=0;i!=objects.size();i++)
  //       objects[i]->post_iteration();
 
-#ifdef USE_ARMADILLO
+#if defined USE_ARMADILLO
     A.fill(0);
     B.fill(0);
+#elif defined USE_LAPACKE
+    _A.fill(0);
+    _B.fill(0);
 #else
     matrix.fill(0);
 #endif
     for(int i=0;i!=objects.size();i++)
         objects[i]->setup_equations();
 
-#ifdef USE_ARMADILLO
-    bool solveok=true;
+#if defined USE_ARMADILLO
     arma::vec X;
     try
     {
@@ -147,19 +160,26 @@ bool PhysicsEngine::iteration()
     }
     catch(std::runtime_error e)
     {
-        solveok=false;
+        e_check_iteration++;
+        delta_t/=2.1;
+        return false;
     }
-    for (int v=0;solveok && v!=eq_variables.size();v++)
-        if (abs(eq_variables[v]->curr()-X(v))>1e3) solveok=false;
-    if (!solveok)
-    {
-        static int a=0;
-//        qDebug() << "using pinv" << a++;
-        X=arma::pinv(A,1e-5)*B;
-    }
+
+
+
     for (int v=0;v!=eq_variables.size();v++)
         eq_variables[v]->curr()=X(v);
-
+#elif defined USE_LAPACKE
+    int nrhs = 1, info = 0;
+    LAPACK_dgesv(&size, &nrhs, _A.data(), &size, ipiv.data(), _B.data(), &size, &info);
+    //    int info = LAPACKE_dgesv( LAPACK_COL_MAJOR, size, 1, _A.data(), size, ipiv.data(), _B.data(), size );
+    if (info != 0)
+    {
+        e_check_iteration++;
+        delta_t/=2.1;
+        return false;
+    }
+    memcpy(curr.data(), _B.data(), sizeof(qreal)*size);
 #else
 
     QVector<qreal> A=matrix;
@@ -270,6 +290,7 @@ PhysicsObject::~PhysicsObject()
     engine->objects.removeOne(this);
 }
 
+#ifndef USE_LAPACKE
 #ifndef USE_ARMADILLO
 
 bool PhysicsEngine::solve(QVector<qreal> &A,int size)
@@ -357,4 +378,5 @@ void PhysicsEngine::dumpA(const QVector<qreal> &A, int size)
     }
 }
 
+#endif
 #endif
