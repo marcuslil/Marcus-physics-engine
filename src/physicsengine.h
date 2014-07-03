@@ -19,14 +19,26 @@ class Energy;
 
 typedef VariableT<qreal> RealVariable;
 
+
+
 class PhysicsEngine
 {
 public:
+    struct Parameters
+    {
+        qreal t, acc_energy_error, k;
+    };
+
+    struct Settings
+    {
+        qreal delta_t, set_k, max_k, min_k, add_k, energy_error_check;
+        bool k_energy_conserv;
+        int max_subitarations, max_e_check_iterations;
+    };
     PhysicsEngine();
     ~PhysicsEngine();
-    qreal set_delta_t,delta_t,t,set_k,k,max_k,min_k,add_k;
-    bool k_energy_conserv;
-    int sub_iteration,max_subitarations,e_check_iteration,max_e_check_iterations;
+    qreal delta_t;
+    int sub_iteration,e_check_iteration;
 
 #if defined USE_ARMADILLO
     arma::mat A;
@@ -53,20 +65,21 @@ public:
     void enableHistory(bool enable=true);
     inline int historySize() {return history_size;}
     void resetHistory(int position);
-    qreal acc_energy_error;
-    QVector<qreal> acc_energy_error_hist;
-    qreal energy_error_check;
+    const Parameters & parameters_at(int position) const;
 //private:
+    Parameters parameters;
+    qreal & t, & k;
+    Settings settings;
     QList<PhysicsObject*> objects;
     QList<RealVariable*> eq_variables;
     QList<Energy*> energies;
     QList<Variable*> variables;
     QVector<char> curr,prev,prev_t,history;
-    QVector<qreal> t_hist;
     friend class PhysicsObject;
     friend class Variable;
     bool history_enabled;
-    int history_size;
+    int history_size,hist_block_size;
+    void add_history();
     void register_variables(PhysicsObject* object, bool eq_variable,Variable* v1,Variable* v2=0,Variable* v3=0,Variable* v4=0,Variable* v5=0,Variable* v6=0,Variable* v7=0,Variable* v8=0,Variable* v9=0,Variable* v10=0);
     void register_energies(PhysicsObject* object, Energy* e1,Energy* e2=0,Energy* e3=0,Energy* e4=0,Energy* e5=0,Energy* e6=0,Energy* e7=0,Energy* e8=0,Energy* e9=0,Energy* e10=0);
 };
@@ -123,7 +136,7 @@ public:
     inline T & at(int history)
     {
         if (history<0 || history>=engine->history_size) return curr();
-        else return *reinterpret_cast<T*>(engine->history.data()  +pos + history*engine->curr.size());
+        else return *reinterpret_cast<T*>(engine->history.data() + pos + history * engine->hist_block_size);
     }
     inline T & curr()   {return *reinterpret_cast<T*>(engine->curr.data()  +pos);}
     inline T & prev()   {return *reinterpret_cast<T*>(engine->prev.data()  +pos);}

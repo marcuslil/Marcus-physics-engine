@@ -64,13 +64,13 @@ void MainWindow::update_graphics(qint64 sim_time)
     draw_time=a.nsecsElapsed();
     used_cpu_time_drawing+=draw_time;
     bool tosloow=sim_time>0 && (draw_time+sim_time)/1e6>=enginesettings.update_graphics_time;
-    ui->times->setText(QString("%1/%2/%3 %4").arg(engine.t).arg(used_cpu_time_simulation/1e9).arg(used_cpu_time_drawing/1e9).arg(tosloow?"Lagging":""));
-    ui->lost->setText(QString("%1").arg(engine.acc_energy_error));
+    ui->times->setText(QString("%1/%2/%3 %4").arg(engine.parameters.t).arg(used_cpu_time_simulation/1e9).arg(used_cpu_time_drawing/1e9).arg(tosloow?"Lagging":""));
+    ui->lost->setText(QString("%1").arg(engine.parameters.acc_energy_error));
 }
 
 void MainWindow::time_step()
 {
-    qreal stop=engine.t+enginesettings.update_graphics_time/1000.0;
+    qreal stop=engine.parameters.t+enginesettings.update_graphics_time/1000.0;
     qint64 sim_time;
     QElapsedTimer a;
     a.start();
@@ -102,7 +102,7 @@ void MainWindow::on_variables_clicked()
         s+=engine.variables.at(v)->object->name+"."+engine.variables.at(v)->name()+QString("=%1\n").arg(engine.variables.at(v)->curr_to_string());
     for (int v=0;v!=engine.eq_variables.size();v++)
         s+=engine.eq_variables.at(v)->object->name+"."+engine.eq_variables.at(v)->name()+QString("=%1\n").arg(engine.eq_variables.at(v)->curr_to_string());
-    if (engine.k_energy_conserv) s+=QString("k=%1").arg(engine.k);
+    if (engine.settings.k_energy_conserv) s+=QString("k=%1").arg(engine.parameters.k);
     ui->vars->setText(s);
 }
 
@@ -140,7 +140,7 @@ void MainWindow::on_setup_activated(const QString &arg1)
     ui->graphicsView->setScene(&world->scene);
     ui->graphicsView->setTransform(QTransform());
     ui->graphicsView->scale(5,5);
-    engine.set_delta_t=0.01;
+    engine.settings.delta_t=0.01;
     if (arg1=="car 1")
     {
         QVector<QPointF> p;
@@ -200,7 +200,7 @@ void MainWindow::on_setup_activated(const QString &arg1)
         new Friction(ground2, wheel2, "Friction ground 2wheel2");
         new Friction(ground2, car, "Friction ground2 car");
 
-        engine.set_delta_t = 0.005;
+        engine.settings.delta_t = 0.005;
     }
     else if (arg1=="build 2 demo")
     {
@@ -266,7 +266,7 @@ void MainWindow::on_setup_activated(const QString &arg1)
         rect->p.y.init=-40;
         rect->m=1;
         new DownForce(rect,"down force");
-        engine.set_delta_t=0.001;
+        engine.settings.delta_t=0.001;
     }
     else if (arg1=="bounce")
     {
@@ -318,7 +318,7 @@ void MainWindow::on_setup_activated(const QString &arg1)
             new StringPendlum(box,"compound pendlum",0,0);
         }
 
-        engine.set_delta_t=0.0001;
+        engine.settings.delta_t=0.0001;
     }
     else if (arg1=="collision")
     {
@@ -562,7 +562,7 @@ void MainWindow::on_setup_activated(const QString &arg1)
                 new Friction(boxn[i],boxn[i2],QString("friction %1 to %2").arg(i).arg(i2));
 
         }
-        engine.set_delta_t=0.005;
+        engine.settings.delta_t=0.005;
     }
     else if(arg1=="collision8")
     {
@@ -650,16 +650,16 @@ void MainWindow::on_slide_history_sliderMoved(int position)
 {
     ui->spin_history->setValue(position);
     world->update_graphics(position);
-    ui->times->setText(QString("%1s").arg(engine.t_hist.at(position)));
-    ui->lost->setText(QString("%1").arg(engine.acc_energy_error_hist.at(position)));
+    ui->times->setText(QString("%1s").arg(engine.parameters_at(position).t));
+    ui->lost->setText(QString("%1").arg(engine.parameters_at(position).acc_energy_error));
 }
 
 void MainWindow::on_spin_history_valueChanged(int arg1)
 {
     ui->slide_history->setValue(arg1);
     world->update_graphics(arg1);
-    ui->times->setText(QString("%1s").arg(engine.t_hist.at(arg1)));
-    ui->lost->setText(QString("%1").arg(engine.acc_energy_error_hist.at(arg1)));
+    ui->times->setText(QString("%1s").arg(engine.parameters_at(arg1).t));
+    ui->lost->setText(QString("%1").arg(engine.parameters_at(arg1).acc_energy_error));
 }
 
 void MainWindow::on_reset_clicked()

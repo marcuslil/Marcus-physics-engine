@@ -8,20 +8,22 @@
 #endif
 
 PhysicsEngine::PhysicsEngine()
+ : t(parameters.t),k(parameters.k)
 {
-    set_delta_t=0.1;
-    t=0;
-    energy_error_check=1e-3;
+    settings.delta_t = 0.1;
+    settings.energy_error_check = 1e-3;
+    settings.max_subitarations = 2;
+    settings.max_e_check_iterations = 0;
+    settings.set_k = 1.0;
+    settings.max_k = 0.9;
+    settings.min_k = 0.7;
+    settings.k_energy_conserv = false;
+    settings.add_k = 0.001;
+    parameters.t = 0.0;
+    parameters.k = settings.set_k;
+    parameters.acc_energy_error = 0.0;
     sub_iteration=0;
-    max_subitarations=2;
     e_check_iteration=0;
-    max_e_check_iterations=0;
-    set_k=1.0;
-    max_k=0.9;
-    min_k=0.7;
-    k_energy_conserv=false;
-    k=1;
-    add_k=0.001;
     clear();
 }
 
@@ -32,10 +34,11 @@ PhysicsEngine::~PhysicsEngine()
 
 void PhysicsEngine::init()
 {
-    t=0;
-    acc_energy_error=0.0;
-    sub_iteration = 0;
-    e_check_iteration = 0;
+    parameters.t = 0.0;
+    parameters.k = settings.set_k;
+    parameters.acc_energy_error = 0.0;
+    sub_iteration=0;
+    e_check_iteration=0;
 
     for (int v=0;v!=eq_variables.size();v++)
     {
@@ -51,14 +54,12 @@ void PhysicsEngine::init()
         curr.resize(curr.size()+variables.at(v)->size());
         variables[v]->initialize();
     }
-    prev=curr;
-    prev_t=curr;
-    history=curr;
-    t_hist.clear();
-    t_hist.append(t);
-    acc_energy_error_hist.clear();
-    acc_energy_error_hist.append(acc_energy_error);
-    history_size = 1;
+    prev = curr;
+    prev_t = curr;
+    hist_block_size = curr.size() + sizeof(parameters);
+    history.clear();
+    history_size = 0;
+    add_history();
 
 #if defined USE_ARMADILLO
     A.resize(eq_variables.size(),eq_variables.size());
@@ -90,24 +91,29 @@ void PhysicsEngine::clear()
     energies.clear();
     curr.clear();
     history.clear();
-    t_hist.clear();
-    acc_energy_error_hist.clear();
     history_size = 0;
     sub_iteration = 0;
     e_check_iteration = 0;
     init();
 }
 
+void PhysicsEngine::add_history()
+{
+    const int alloc_ahead = 10000;
+    int alloc = ((history_size + alloc_ahead - 1) / alloc_ahead) * alloc_ahead + 1;
+    history.resize(alloc * hist_block_size);
+    memcpy(history.data() + history_size * hist_block_size, curr.data(), curr.size());
+    memcpy(history.data() + history_size * hist_block_size + curr.size(), &parameters, sizeof(parameters));
+    history_size++;
+}
+
 void PhysicsEngine::enableHistory(bool enable)
 {
     if (!enable)
     {
-        history=curr;
+        history.clear();
         history_size = 0;
-        t_hist.clear();
-        t_hist.append(t);
-        acc_energy_error_hist.clear();
-        acc_energy_error_hist.append(acc_energy_error);
+        add_history();
     }
     history_enabled = enable;
 }
@@ -115,17 +121,20 @@ void PhysicsEngine::enableHistory(bool enable)
 void PhysicsEngine::resetHistory(int position)
 {
     Q_ASSERT(position < history_size);
-    history.resize((position+1)*curr.size());
-    history_size = position+1;
-    memcpy(curr.data(),history.data()+position*curr.size(), curr.size());
+    history.resize((position + 1) * hist_block_size);
+    history_size = position + 1;
+    memcpy(curr.data(), history.data() + position * hist_block_size, curr.size());
+    memcpy(&parameters, history.data() + position * hist_block_size + curr.size(), sizeof(parameters));
     prev = curr;
     prev_t = curr;
-    t_hist.resize(position+1);
-    t=t_hist.at(position);
-    acc_energy_error_hist.resize(position+1);
-    acc_energy_error = acc_energy_error_hist.at(position);
     sub_iteration = 0;
     e_check_iteration = 0;
+}
+
+const PhysicsEngine::Parameters & PhysicsEngine::parameters_at(int position) const
+{
+    if (position < 0) return parameters;
+    return *(reinterpret_cast<const Parameters*>(history.data() + position * hist_block_size + curr.size()));
 }
 
 void PhysicsEngine::register_variables(PhysicsObject *object, bool eq_variable,Variable *v1, Variable *v2, Variable *v3, Variable *v4, Variable *v5, Variable *v6, Variable *v7, Variable *v8, Variable *v9, Variable *v10)
@@ -163,7 +172,7 @@ bool PhysicsEngine::iteration()
 {
     //qDebug() << "iteration";
     if (e_check_iteration==0)
-        delta_t=set_delta_t;
+        delta_t=settings.delta_t;
 
  //   for(int i=0;i!=objects.size();i++)
  //       objects[i]->post_iteration();
@@ -177,6 +186,9 @@ bool PhysicsEngine::iteration()
 #else
     matrix.fill(0);
 #endif
+    if (!settings.k_energy_conserv)
+        parameters.k=settings.set_k;
+
     for(int i=0;i!=objects.size();i++)
         objects[i]->setup_equations();
 
@@ -218,7 +230,7 @@ bool PhysicsEngine::iteration()
     for(int i=0;i!=objects.size();i++)
         objects[i]->post_iteration();
 
-    if (sub_iteration<max_subitarations)
+    if (sub_iteration<settings.max_subitarations)
     {
         sub_iteration++;
         prev=curr;
@@ -239,7 +251,7 @@ bool PhysicsEngine::iteration()
     }
        // qDebug() << "Enery delta " << Edelta_error << acc_energy_error+Edelta_error << "dt" << delta_t;
 
-    if (e_check_iteration<max_e_check_iterations && fabs(Edelta_error/delta_t*2.0)>energy_error_check)
+    if (e_check_iteration<settings.max_e_check_iterations && fabs(Edelta_error/delta_t*2.0)>settings.energy_error_check)
     {
         delta_t=delta_t/2.0;
         curr=prev_t;
@@ -256,27 +268,18 @@ bool PhysicsEngine::iteration()
     prev_t=curr;
     prev=curr;
 
-    acc_energy_error+=Edelta_error;
-    if (k_energy_conserv)
+    parameters.acc_energy_error+=Edelta_error;
+    if (settings.k_energy_conserv)
     {
-        if (acc_energy_error<0) k=k-add_k;
-        else k=k+add_k;
-        if (k>max_k) k=max_k;
-        if (k<min_k) k=min_k;
-    }
-    else
-        k=set_k;
-
-    t=t+delta_t;
-
-    if (history_enabled)
-    {
-        history+=curr;
-        history_size++;
-        t_hist += t;
-        acc_energy_error_hist += acc_energy_error;
+        if (parameters.acc_energy_error<0) parameters.k=parameters.k-settings.add_k;
+        else parameters.k=parameters.k+settings.add_k;
+        if (parameters.k>settings.max_k) parameters.k=settings.max_k;
+        if (parameters.k<settings.min_k) parameters.k=settings.min_k;
     }
 
+    parameters.t += delta_t;
+
+    if (history_enabled) add_history();
     return true;
 }
 

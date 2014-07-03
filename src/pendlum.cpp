@@ -113,9 +113,7 @@ MathPendlum::MathPendlum(Mechanic2DWorld *world, const QString &name, qreal x, q
 
 void MathPendlum::update_graphics(int history)
 {
-    qreal t;
-    if (history>=0) t = engine->t_hist.at(history);
-    else t = engine->t;
+    qreal t = engine->parameters_at(history).t;
     rect->setPos(x+cos(2.0*M_PI*t/T)*m,y);
 }
 
