@@ -23,7 +23,6 @@ public:
     Mechanic2DWorld *world;
     QTimer timer;
     bool running;
-    bool eventFilter(QObject *, QEvent *);
     void closeEvent(QCloseEvent *);
 
 private slots:

@@ -23,8 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     enginesettings.engine=&engine;
     engine.enableHistory();
 
-    ui->graphicsView->installEventFilter(this);
-
     on_setup_activated(ui->setup->itemText(0));
 }
 
@@ -634,48 +632,6 @@ void MainWindow::on_setup_activated(const QString &arg1)
 void MainWindow::on_sim_settings_clicked()
 {
     enginesettings.show();
-}
-
-bool MainWindow::eventFilter(QObject *object, QEvent *event)
-{
-    if (object!=ui->graphicsView) return QMainWindow::eventFilter(object,event);
-    if (event->type() != QEvent::Wheel) return false;
-    // Typical Calculations (Ref Qt Doc)
-    QWheelEvent *event2=dynamic_cast<QWheelEvent*>(event);
-        const int degrees = event2->delta() / 8;
-        int steps = degrees / 15;
-
-        QTransform m=ui->graphicsView->transform();
-        if (steps>0)
-            m.scale(1.1,1.1);
-        else
-            m.scale(1.0/1.1,1.0/1.1);
-        ui->graphicsView->setTransform(m);
-        return true;
-        /*
-
-        // Declare below as class member vars and set default values as below
-        // qreal h11 = 1.0
-        // qreal h12 = 0
-        // qreal h21 = 1.0
-        // qreal h22 = 0
-
-        double scaleFactor = 1.0; //How fast we zoom
-        const qreal minFactor = 1.0;
-        const qreal maxFactor = 10.0;
-        if(steps > 0)
-        {
-            qreal h11 = (h11 >= maxFactor) ? h11 : (h11 + scaleFactor);
-            qreal h22 = (h22 >= maxFactor) ? h22 : (h22 + scaleFactor);
-        }
-        else
-        {
-            qreal h11 = (h11 <= minFactor) ? minFactor : (h11 - scaleFactor);
-            qreal h22 = (h22 <= minFactor) ? minFactor : (h22 - scaleFactor);
-        }
-
-        ui->graphicsView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-        ui->graphicsView->setTransform(QTransform(h11, h12, h21, h22, 0, 0));*/
 }
 
 void MainWindow::closeEvent(QCloseEvent *)

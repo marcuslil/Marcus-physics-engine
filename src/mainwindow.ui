@@ -16,17 +16,17 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QGraphicsView" name="graphicsView">
+     <widget class="GraphicsView" name="graphicsView">
       <property name="sceneRect">
        <rectf>
         <x>0.000000000000000</x>
         <y>0.000000000000000</y>
-        <width>1.000000000000000</width>
-        <height>1.000000000000000</height>
+        <width>0.000000000000000</width>
+        <height>0.000000000000000</height>
        </rectf>
       </property>
       <property name="dragMode">
-       <enum>QGraphicsView::NoDrag</enum>
+       <enum>QGraphicsView::ScrollHandDrag</enum>
       </property>
       <property name="transformationAnchor">
        <enum>QGraphicsView::AnchorUnderMouse</enum>
@@ -328,6 +328,13 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>GraphicsView</class>
+   <extends>QGraphicsView</extends>
+   <header>graphicsview.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

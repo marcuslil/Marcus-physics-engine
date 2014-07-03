@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     enginesettings.cpp \
     pendlumdialog.cpp \
     connections.cpp \
-    friction.cpp
+    friction.cpp \
+    graphicsview.cpp
 
 HEADERS  += mainwindow.h \
     physicsengine.h \
@@ -27,7 +28,8 @@ HEADERS  += mainwindow.h \
     enginesettings.h \
     pendlumdialog.h \
     connections.h \
-    friction.h
+    friction.h \
+    graphicsview.h
 
 FORMS    += mainwindow.ui \
     enginesettings.ui \
