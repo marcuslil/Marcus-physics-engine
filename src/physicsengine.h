@@ -26,19 +26,20 @@ class PhysicsEngine
 public:
     struct Parameters
     {
-        qreal t, acc_energy_error, k;
+        qreal t, energy_error, acc_energy_error, k;
     };
 
     struct Settings
     {
-        qreal delta_t, set_k, max_k, min_k, add_k, energy_error_check;
-        bool k_energy_conserv;
-        int max_subitarations, max_e_check_iterations;
+        qreal max_delta_t, min_delta_t, set_k, max_k, min_k, add_k, energy_error_check;
+        bool k_energy_conserv, e_check;
+        int max_subitarations;
     };
     PhysicsEngine();
     ~PhysicsEngine();
     qreal delta_t;
-    int sub_iteration,e_check_iteration;
+    int sub_iteration;
+    bool small_time_step;
 
 #if defined USE_ARMADILLO
     arma::mat A;
@@ -67,7 +68,7 @@ public:
     void resetHistory(int position);
     const Parameters & parameters_at(int position) const;
 //private:
-    Parameters parameters;
+    Parameters parameters, parameters_last_t;
     qreal & t, & k;
     Settings settings;
     QList<PhysicsObject*> objects;

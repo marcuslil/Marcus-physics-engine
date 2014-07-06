@@ -225,7 +225,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Accumulated enery error [J]:</string>
+         <string>Enery error[J/s]/accumulated[J]:</string>
         </property>
        </widget>
       </item>

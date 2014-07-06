@@ -28,27 +28,23 @@ void EngineSettings::gui_to_data()
     val=ui->energy->text().toDouble(&ok);
     if (ok && val>0.0) engine->settings.energy_error_check=val;
 
-    if (ui->energy_check->isChecked())
-    {
-        ival=ui->max_energy_iters->text().toInt(&ok);
-        if (!ok || ival<=0)
-            ival=1;
-        engine->settings.max_e_check_iterations=ival;
-    }
-    else
-        engine->settings.max_e_check_iterations=0;
+    engine->settings.e_check = ui->energy_check->isChecked();
 
-     val=ui->grap_update->text().toDouble(&ok)*1000.0;
-     if (val==0) val=1;
-     if (ok && val>0) update_graphics_time=val;
+    val=ui->grap_update->text().toDouble(&ok)*1000.0;
+    if (val==0) val=1;
+    if (ok && val>0) update_graphics_time=val;
 
-     val=ui->set_delta_t->text().toDouble(&ok);
-     if (ok && val>0)
-         engine->settings.delta_t=val;
+    val=ui->max_delta_t->text().toDouble(&ok);
+    if (ok && val>0)
+        engine->settings.max_delta_t=val;
 
-     val=ui->set_k->text().toDouble(&ok);
-     if (ok)
-         engine->settings.set_k=val;
+    val=ui->min_delta_t->text().toDouble(&ok);
+    if (ok && val>0)
+        engine->settings.min_delta_t=val;
+
+    val=ui->set_k->text().toDouble(&ok);
+    if (ok)
+        engine->settings.set_k=val;
 
     engine->settings.k_energy_conserv=ui->update_k->isChecked();
 
@@ -64,26 +60,14 @@ void EngineSettings::gui_to_data()
 
 void EngineSettings::data_to_gui()
 {
-
     qDebug() << Q_FUNC_INFO;
-    ui->grap_update->setText(QString("%1").arg(update_graphics_time/1000.0));
-    ui->set_delta_t->setText(QString("%1").arg(engine->settings.delta_t));
+    ui->grap_update->setText(QString("%1").arg(update_graphics_time / 1000.0));
+    ui->max_delta_t->setText(QString("%1").arg(engine->settings.max_delta_t));
+    ui->min_delta_t->setText(QString("%1").arg(engine->settings.min_delta_t));
     ui->max_iter_tstep->setText(QString("%1").arg(engine->settings.max_subitarations));
     ui->energy->setText(QString("%1").arg(engine->settings.energy_error_check));
-    if (engine->settings.max_e_check_iterations>0)
-    {
-        ui->energy_check->setChecked(true);
-        ui->max_energy_iters->setEnabled(true);
-        ui->max_energy_iters->setText(QString("%1").arg(engine->settings.max_e_check_iterations));
-        ui->energy->setEnabled(true);
-    }
-    else
-    {
-        ui->energy_check->setChecked(false);
-        ui->max_energy_iters->setEnabled(false);
-        ui->energy->setEnabled(false);
-    }
-
+    ui->energy_check->setChecked(engine->settings.e_check);
+    ui->energy->setEnabled(engine->settings.e_check);
 
     ui->set_k->setText(QString("%1").arg(engine->settings.set_k));
     ui->update_k->setChecked(engine->settings.k_energy_conserv);
@@ -91,10 +75,8 @@ void EngineSettings::data_to_gui()
     ui->min_k->setText(QString("%1").arg(engine->settings.min_k));
     ui->max_k->setText(QString("%1").arg(engine->settings.max_k));
 
-
     ui->set_k->setEnabled(!engine->settings.k_energy_conserv);
     ui->add_k->setEnabled(engine->settings.k_energy_conserv);
     ui->max_k->setEnabled(engine->settings.k_energy_conserv);
     ui->min_k->setEnabled(engine->settings.k_energy_conserv);
-
 }

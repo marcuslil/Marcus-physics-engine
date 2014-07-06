@@ -10,10 +10,11 @@
 PhysicsEngine::PhysicsEngine()
  : t(parameters.t),k(parameters.k)
 {
-    settings.delta_t = 0.1;
+    settings.max_delta_t = 0.01;
+    settings.min_delta_t = 0.001;
     settings.energy_error_check = 1e-3;
     settings.max_subitarations = 2;
-    settings.max_e_check_iterations = 0;
+    settings.e_check = false;
     settings.set_k = 1.0;
     settings.max_k = 0.9;
     settings.min_k = 0.7;
@@ -22,8 +23,8 @@ PhysicsEngine::PhysicsEngine()
     parameters.t = 0.0;
     parameters.k = settings.set_k;
     parameters.acc_energy_error = 0.0;
-    sub_iteration=0;
-    e_check_iteration=0;
+    sub_iteration = 0;
+    small_time_step = false;
     clear();
 }
 
@@ -37,8 +38,11 @@ void PhysicsEngine::init()
     parameters.t = 0.0;
     parameters.k = settings.set_k;
     parameters.acc_energy_error = 0.0;
-    sub_iteration=0;
-    e_check_iteration=0;
+    parameters.energy_error = 0.0;
+    parameters_last_t = parameters;
+    sub_iteration = 0;
+    delta_t = settings.max_delta_t;
+    small_time_step = false;
 
     for (int v=0;v!=eq_variables.size();v++)
     {
@@ -81,7 +85,6 @@ void PhysicsEngine::init()
 #endif
 }
 
-
 void PhysicsEngine::clear()
 {
     while(!objects.isEmpty())
@@ -93,7 +96,6 @@ void PhysicsEngine::clear()
     history.clear();
     history_size = 0;
     sub_iteration = 0;
-    e_check_iteration = 0;
     init();
 }
 
@@ -128,7 +130,8 @@ void PhysicsEngine::resetHistory(int position)
     prev = curr;
     prev_t = curr;
     sub_iteration = 0;
-    e_check_iteration = 0;
+    delta_t = settings.max_delta_t;
+    small_time_step = false;
 }
 
 const PhysicsEngine::Parameters & PhysicsEngine::parameters_at(int position) const
@@ -170,9 +173,14 @@ void PhysicsEngine::register_energies(PhysicsObject *object,Energy *e1, Energy *
 
 bool PhysicsEngine::iteration()
 {
-    //qDebug() << "iteration";
-    if (e_check_iteration==0)
-        delta_t=settings.delta_t;
+    if (!small_time_step)
+        delta_t = settings.max_delta_t;
+
+    if (delta_t < settings.min_delta_t)
+    {
+        delta_t = settings.max_delta_t;
+        return false;
+    }
 
  //   for(int i=0;i!=objects.size();i++)
  //       objects[i]->post_iteration();
@@ -222,15 +230,23 @@ bool PhysicsEngine::iteration()
 #endif
     if (!solveok)
     {
-        e_check_iteration++;
-        delta_t/=2.1;
-        return false;
+        delta_t /= 1.5;
+        if (delta_t < settings.min_delta_t)
+        {
+            delta_t = settings.max_delta_t;
+            small_time_step = false;
+            parameters = parameters_last_t;
+            qDebug() << "unsolveable matrix";
+            return false;
+        }
+        small_time_step = true;
+        return true;
     }
 
     for(int i=0;i!=objects.size();i++)
         objects[i]->post_iteration();
 
-    if (sub_iteration<settings.max_subitarations)
+    if (sub_iteration < settings.max_subitarations)
     {
         sub_iteration++;
         prev=curr;
@@ -243,32 +259,40 @@ bool PhysicsEngine::iteration()
     for (int o=0;o!=objects.size();o++)
         objects.at(o)->calc_energy_diff();
 
-    qreal Edelta_error=0;
+    parameters.energy_error = 0.0;
     for (int e=0;e!=energies.size();e++)
     {
  //       qDebug() << energies.at(e)->object->name << " " << energies.at(e)->name << " " <<energies.at(e)->delta;
-        Edelta_error+=energies.at(e)->delta;
+        parameters.energy_error += energies.at(e)->delta;
+       // if (fabs(energies.at(e)->delta)> 0.1)
+       //     qDebug() << energies.at(e)->name << energies.at(e)->delta;
     }
        // qDebug() << "Enery delta " << Edelta_error << acc_energy_error+Edelta_error << "dt" << delta_t;
 
-    if (e_check_iteration<settings.max_e_check_iterations && fabs(Edelta_error/delta_t*2.0)>settings.energy_error_check)
+    parameters.acc_energy_error += parameters.energy_error;
+    parameters.energy_error /= delta_t;
+    if (settings.e_check && fabs(parameters.energy_error) > settings.energy_error_check)
     {
-        delta_t=delta_t/2.0;
-        curr=prev_t;
-        prev=prev_t;
+        delta_t /= 2.0;
+        curr = prev_t;
+        prev = prev_t;
 
-        e_check_iteration++;
+        if (delta_t < settings.min_delta_t)
+        {
+            qDebug() << fabs(parameters.energy_error);
+            delta_t = settings.max_delta_t;
+            small_time_step = false;
+            parameters = parameters_last_t;
+            return false;
+        }
+        small_time_step = true;
         return true;
     }
 
-    e_check_iteration=0;
-
-  //  qDebug() << "pass edelta" << Edelta_error;
-
     prev_t=curr;
     prev=curr;
+    parameters_last_t = parameters;
 
-    parameters.acc_energy_error+=Edelta_error;
     if (settings.k_energy_conserv)
     {
         if (parameters.acc_energy_error<0) parameters.k=parameters.k-settings.add_k;
@@ -278,6 +302,7 @@ bool PhysicsEngine::iteration()
     }
 
     parameters.t += delta_t;
+    small_time_step = false;
 
     if (history_enabled) add_history();
     return true;
