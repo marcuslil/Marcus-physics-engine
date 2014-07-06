@@ -363,6 +363,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>energy</sender>
+   <signal>editingFinished()</signal>
+   <receiver>EngineSettings</receiver>
+   <slot>gui_to_data()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>188</x>
+     <y>309</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>188</x>
+     <y>308</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>gui_to_data()</slot>
