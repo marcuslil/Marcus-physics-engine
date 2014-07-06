@@ -87,6 +87,22 @@ public:
     virtual void post_iteration();
 };
 
+class IdealFreeFall : public PhysicsObject, public Graphics2D
+{
+public:
+    IdealFreeFall(Mechanic2DWorld *world, const QString & name, Shape2D *shape=0);
+    ~IdealFreeFall();
+    qreal g,y0;
+
+    QGraphicsRectItem *rect;
+
+    void calc_energy_diff();
+    virtual void update_graphics(int history);
+    virtual void setup_equations();
+    virtual void post_iteration();
+};
+
+
 class DownForce : public PhysicsObject
 {
 public:
@@ -130,5 +146,6 @@ public:
     qreal const_torque;
     virtual void setup_equations();
 };
+
 
 #endif // MECHANICS2D_H

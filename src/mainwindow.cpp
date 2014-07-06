@@ -267,6 +267,9 @@ void MainWindow::on_setup_activated(const QString &arg1)
         rect->p.y.init=-40;
         rect->m=1;
         new DownForce(rect,"down force");
+        IdealFreeFall *i = new IdealFreeFall(world, "free fall",0);
+        i->y0 = -40;
+
         engine.settings.max_delta_t=0.001;
     }
     else if (arg1=="bounce")

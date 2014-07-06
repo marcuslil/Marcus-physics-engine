@@ -304,3 +304,33 @@ void ConstTorque::setup_equations()
     B(t.nr)=const_torque;
 }
 
+IdealFreeFall::IdealFreeFall(Mechanic2DWorld *world, const QString &name, Shape2D *shape)
+ : PhysicsObject(world->engine), Graphics2D(world)
+{
+    g = 9.82;
+    y0 = 0.0;
+    rect=new QGraphicsRectItem();
+    rect->setRect(-1,-1,2,2);
+    rect->setBrush(Qt::red);
+    world->scene.addItem(rect);
+}
+
+IdealFreeFall::~IdealFreeFall()
+{
+}
+
+void IdealFreeFall::update_graphics(int history)
+{
+    qreal t = engine->parameters_at(history).t;
+    qreal y = y0 + 9.82 * t * t / 2.0;
+    rect->setPos(0, y);
+}
+
+void IdealFreeFall::setup_equations()
+{}
+
+void IdealFreeFall::post_iteration()
+{}
+
+void IdealFreeFall::calc_energy_diff()
+{}
