@@ -127,6 +127,7 @@ void PhysicsEngine::resetHistory(int position)
     history_size = position + 1;
     memcpy(curr.data(), history.data() + position * hist_block_size, curr.size());
     memcpy(&parameters, history.data() + position * hist_block_size + curr.size(), sizeof(parameters));
+    parameters_last_t = parameters;
     prev = curr;
     prev_t = curr;
     sub_iteration = 0;
@@ -276,16 +277,16 @@ bool PhysicsEngine::iteration()
         delta_t /= 2.0;
         curr = prev_t;
         prev = prev_t;
-
         if (delta_t < settings.min_delta_t)
         {
-            qDebug() << fabs(parameters.energy_error);
+            qDebug() << "energy error" << fabs(parameters.energy_error);
             delta_t = settings.max_delta_t;
             small_time_step = false;
             parameters = parameters_last_t;
             return false;
         }
-        small_time_step = true;
+        parameters = parameters_last_t;
+            small_time_step = true;
         return true;
     }
 
