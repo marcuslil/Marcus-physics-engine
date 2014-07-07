@@ -4,10 +4,11 @@
 #include <math.h>
 
 Friction::Friction(Mechanic2DObject *object1, Mechanic2DObject *object2, const QString &name)
-    : PhysicsObject(object1->engine,name),Graphics2D(object1->world),f("f"),tau1("tau1"),tau2("tau2"),state("state"),prevstate("prevstate"),index1("index1"),index2("index2"),angle("angle"),angle2("angle2"),length("length"),object1(object1),object2(object2)
+    : PhysicsObject(object1->engine,name),Graphics2D(object1->world),f("f"),tau1("tau1"),tau2("tau2"),state("state"),prevstate("prevstate"),index1("index1"),index2("index2"),angle("angle"),angle2("angle2"),length("length"),object1(object1),object2(object2),E("E")
 {
     register_eq_variables(&f.x,&f.y,&tau1,&tau2);
     register_variables(&state,&prevstate,&angle,&angle2,&length,&index1,&index2);
+    register_energies(&E);
     object1->pos_forces.append(&f);
     object2->neg_forces.append(&f);
     object1->pos_torque.append(&tau1);
@@ -306,7 +307,18 @@ void Friction::setup_equations()
 
 void Friction::calc_energy_diff()
 {
-
+    if (state.curr() != Free)
+    {
+        MassObject *o1 = dynamic_cast<MassObject*>(object1);
+        MassObject *o2 = dynamic_cast<MassObject*>(object2);
+        E.delta -=  (f.y.curr() * engine->k + f.y.prev_t() * (1.0 - engine->k)) * (o1->v.y.prev_t() + o1->v.y.curr() - o2->v.y.prev_t() - o2->v.y.curr()) * engine->delta_t / 2.0;
+        E.delta -=  (f.x.curr() * engine->k + f.x.prev_t() * (1.0 - engine->k)) * (o1->v.x.prev_t() + o1->v.x.curr() - o2->v.x.prev_t() - o2->v.x.curr()) * engine->delta_t / 2.0;
+        E.delta -=  (tau1.curr() * engine->k + tau1.prev_t() * (1.0 - engine->k)) * (o1->w.prev_t() + o1->w.curr()) * engine->delta_t / 2.0;
+        E.delta -=  (tau2.curr() * engine->k + tau2.prev_t() * (1.0 - engine->k)) * (o2->w.prev_t() + o2->w.curr()) * engine->delta_t / 2.0;
+        if (E.delta < 0.0) E.delta = 0.0;
+    }
+    else
+        E.delta = 0.0;
 }
 
 qreal sgn(qreal a)
