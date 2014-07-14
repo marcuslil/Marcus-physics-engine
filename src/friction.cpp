@@ -311,6 +311,7 @@ void Friction::calc_energy_diff()
     {
         MassObject *o1 = dynamic_cast<MassObject*>(object1);
         MassObject *o2 = dynamic_cast<MassObject*>(object2);
+        E.delta = 0.0;
         E.delta -=  (f.y.curr() * engine->k + f.y.prev_t() * (1.0 - engine->k)) * (o1->v.y.prev_t() + o1->v.y.curr() - o2->v.y.prev_t() - o2->v.y.curr()) * engine->delta_t / 2.0;
         E.delta -=  (f.x.curr() * engine->k + f.x.prev_t() * (1.0 - engine->k)) * (o1->v.x.prev_t() + o1->v.x.curr() - o2->v.x.prev_t() - o2->v.x.curr()) * engine->delta_t / 2.0;
         E.delta -=  (tau1.curr() * engine->k + tau1.prev_t() * (1.0 - engine->k)) * (o1->w.prev_t() + o1->w.curr()) * engine->delta_t / 2.0;
