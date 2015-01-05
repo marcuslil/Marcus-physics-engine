@@ -21,7 +21,7 @@ echo >>src/physicsengine_for_win.pro "INCLUDEPATH  += ../lapack_3.5.0_win32"
 cat >build.BAT << EOF
 call C:\Qt\4.8.6\bin\qtvars
 qmake src\physicsengine_for_win.pro
-call make release
+call make release -j 4
 REM release\fysik1
 REM cmd
 EOF

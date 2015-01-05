@@ -9,6 +9,6 @@ mkdir $BUILD_DIR
 cd $BUILD_DIR
 
 qmake-qt4 ../src/physicsengine.pro
-make
+make -j 4
 
 echo done building linux
