@@ -5,6 +5,7 @@ set -e
 
 ./build-w32.sh
 ./build-linux.sh
+./build-doc.sh
 
 SAVE_DIR=saved_builds
 
@@ -21,6 +22,7 @@ tar cj src >$SAVE_DIR/$DIR/src.tar.bz
 cd $SAVE_DIR
 cp ../build_w32/release/fysik1.exe  $DIR/fysik1_w32_${NAME}.exe
 cp ../build_linux/fysik1 $DIR/fysik_$(arch)_${NAME}
+cp ../build_doc/physicsengine.pdf $DIR
 
 zip $DIR.zip -r $DIR
 mkdir -p ~/Dropbox/Public/fysikmotor
